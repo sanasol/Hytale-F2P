@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hytale Launcher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            position: relative;
+        }
+
+        .titlebar {
+            -webkit-app-region: drag;
+        }
+
+        .titlebar button {
+            -webkit-app-region: no-drag;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .bg-image {
+            background-image: url('https://cdn.mos.cms.futurecdn.net/WvoJzdTLrTvxdUNhsTLJKU.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .scanlines::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .neon-glow {
+            text-shadow: 
+                0 0 10px rgba(147, 51, 234, 0.8),
+                0 0 20px rgba(147, 51, 234, 0.6),
+                0 0 30px rgba(147, 51, 234, 0.4);
+        }
+
+        .holographic {
+            background: linear-gradient(
+                135deg,
+                rgba(147, 51, 234, 0.1) 0%,
+                rgba(126, 34, 206, 0.05) 25%,
+                rgba(147, 51, 234, 0.1) 50%,
+                rgba(126, 34, 206, 0.05) 75%,
+                rgba(147, 51, 234, 0.1) 100%
+            );
+            background-size: 200% 200%;
+            animation: holographic 3s ease infinite;
+        }
+
+        @keyframes holographic {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .panel {
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(147, 51, 234, 0.1);
+        }
+
+        .play-button {
+            background: linear-gradient(135deg, #9333ea 0%, #7e22ce 50%, #6b21a8 100%);
+            border: 2px solid rgba(147, 51, 234, 0.5);
+            box-shadow: 
+                0 0 30px rgba(147, 51, 234, 0.5),
+                0 10px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .play-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            transform: rotate(45deg);
+            transition: transform 0.6s;
+        }
+
+        .play-button:hover:not(:disabled)::before {
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+
+        .play-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 0 50px rgba(147, 51, 234, 0.8),
+                0 15px 50px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .play-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .input-field {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: rgba(147, 51, 234, 0.6);
+            background: rgba(15, 15, 15, 0.9);
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+        }
+
+        .progress-container {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, 
+                #9333ea 0%, 
+                #7e22ce 25%, 
+                #6b21a8 50%, 
+                #7e22ce 75%, 
+                #9333ea 100%);
+            background-size: 200% 100%;
+            animation: progressFlow 2s linear infinite;
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.6);
+        }
+
+        @keyframes progressFlow {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+
+        .glitch:hover {
+            animation: glitch 0.3s infinite;
+        }
+
+        .hex-pattern {
+            background-image: 
+                repeating-linear-gradient(30deg, transparent, transparent 2px, rgba(147, 51, 234, 0.03) 2px, rgba(147, 51, 234, 0.03) 4px),
+                repeating-linear-gradient(-30deg, transparent, transparent 2px, rgba(147, 51, 234, 0.03) 2px, rgba(147, 51, 234, 0.03) 4px);
+        }
+
+        .credits-link {
+            color: rgba(147, 51, 234, 0.7);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .credits-link:hover {
+            color: rgba(147, 51, 234, 1);
+            text-shadow: 0 0 10px rgba(147, 51, 234, 0.5);
+        }
+
+        #loadingScreen {
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-image relative">
+    <div class="absolute inset-0 bg-black/50 z-0"></div>
+    <div class="absolute inset-0 hex-pattern z-0"></div>
+    <div class="absolute inset-0 scanlines z-0"></div>
+    
+    <div class="titlebar fixed top-0 left-0 right-0 h-8 panel flex items-center justify-between px-6 z-50 relative">
+        <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+            <span class="font-mono text-xs text-gray-300 font-semibold tracking-wider">HYTALE LAUNCHER</span>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="minimizeWindow()" class="text-gray-400 hover:text-white transition-colors text-sm">
+                <i class="fas fa-minus"></i>
+            </button>
+            <button onclick="closeWindow()" class="text-gray-400 hover:text-red-400 transition-colors text-sm">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="w-[1280px] h-[720px] relative pt-8 z-10">
+        <div class="h-full flex flex-col">
+            <div class="flex-1 flex items-center justify-center relative">
+                <div class="flex flex-col items-center gap-8">
+                    <div class="text-center">
+                        <h1 class="text-7xl font-bold neon-glow text-purple-500 mb-2 tracking-tight">
+                            HYTALE
+                        </h1>
+                        <p class="font-mono text-sm text-gray-400 tracking-widest">F2P LAUNCHER</p>
+                    </div>
+
+                    <div class="w-80">
+                        <label class="block font-mono text-xs text-gray-400 mb-2 uppercase tracking-wider">
+                            Player Name
+                        </label>
+                        <input 
+                            type="text" 
+                            id="playerName" 
+                            value="Player" 
+                            class="input-field w-full rounded-lg px-4 py-3 text-white font-mono text-base focus:outline-none"
+                            placeholder="Enter your name"
+                        >
+                    </div>
+
+                    <button 
+                        id="playBtn"
+                        onclick="launch()"
+                        class="play-button w-64 h-16 rounded-2xl text-white font-bold text-2xl flex items-center justify-center transition-all transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none relative"
+                    >
+                        <span id="playText" class="relative z-10 font-mono tracking-wider">PLAY</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pb-8 px-12">
+                <div class="panel rounded-xl p-6 mb-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></div>
+                            <span id="progressText" class="font-mono text-sm text-gray-300">Waiting to start</span>
+                        </div>
+                        <span id="progressPercent" class="font-mono text-3xl font-bold text-purple-500">0%</span>
+                    </div>
+
+                    <div class="progress-container rounded-full h-3 overflow-hidden mb-3">
+                        <div id="progressBar" class="progress-fill h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+
+                    <div id="progressDetails" class="flex justify-between items-center">
+                        <span id="progressSpeed" class="font-mono text-xs text-gray-500"></span>
+                        <span id="progressSize" class="font-mono text-xs text-gray-500"></span>
+                    </div>
+                </div>
+
+                <div class="text-center relative z-30">
+                    <p class="font-mono text-xs text-gray-600">
+                        Credits: 
+                        <a href="https://github.com/amiayweb" target="_blank" class="credits-link font-semibold hover:underline">@amiayweb</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingScreen" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="font-mono text-sm text-gray-400">Initializing launcher...</p>
+        </div>
+    </div>
+
+    <script>
+        let username = 'Player';
+        let isDownloading = false;
+
+        const playBtn = document.getElementById('playBtn');
+        const playText = document.getElementById('playText');
+        const playerNameInput = document.getElementById('playerName');
+        const progressText = document.getElementById('progressText');
+        const progressPercent = document.getElementById('progressPercent');
+        const progressSpeed = document.getElementById('progressSpeed');
+        const progressSize = document.getElementById('progressSize');
+        const progressBar = document.getElementById('progressBar');
+        const loadingScreen = document.getElementById('loadingScreen');
+
+        async function init() {
+            try {
+                const savedUsername = await window.electronAPI.loadUsername();
+                if (savedUsername) {
+                    playerNameInput.value = savedUsername;
+                    username = savedUsername;
+                }
+            } catch (error) {
+                console.error('Failed to load username:', error);
+            } finally {
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    loadingScreen.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }, 800);
+            }
+        }
+
+        init();
+
+        function updateProgress(data) {
+            if (data.message) {
+                progressText.textContent = data.message;
+            }
+            
+            if (data.percent !== null && data.percent !== undefined) {
+                const percent = Math.min(100, Math.max(0, Math.round(data.percent)));
+                progressPercent.textContent = `${percent}%`;
+                progressBar.style.width = `${percent}%`;
+            }
+
+            if (data.speed !== null && data.speed !== undefined && 
+                data.downloaded !== null && data.downloaded !== undefined && 
+                data.total !== null && data.total !== undefined) {
+                const speedMB = (data.speed / 1024 / 1024).toFixed(2);
+                const downloadedMB = (data.downloaded / 1024 / 1024).toFixed(2);
+                const totalMB = (data.total / 1024 / 1024).toFixed(2);
+                progressSpeed.textContent = `${speedMB} MB/s`;
+                progressSize.textContent = `${downloadedMB} / ${totalMB} MB`;
+            } else if (data.message && !data.percent) {
+                progressSpeed.textContent = '';
+                progressSize.textContent = '';
+            }
+        }
+
+        window.electronAPI.onProgressUpdate((data) => {
+            updateProgress(data);
+        });
+
+        playerNameInput.addEventListener('input', async () => {
+            const playerName = playerNameInput.value.trim();
+            if (playerName) {
+                await window.electronAPI.saveUsername(playerName);
+            }
+        });
+
+        async function launch() {
+            const playerName = playerNameInput.value.trim() || 'Player';
+            
+            await window.electronAPI.saveUsername(playerName);
+            
+            if (isDownloading || playBtn.disabled) return;
+            
+            isDownloading = true;
+            playBtn.disabled = true;
+            playText.textContent = 'PROCESSING...';
+
+            try {
+                const result = await window.electronAPI.launchGame(playerName);
+                
+                if (result.success) {
+                    progressText.textContent = 'Game started!';
+                    setTimeout(() => {
+                        window.electronAPI.closeWindow();
+                    }, 2000);
+                } else {
+                    progressText.textContent = `Failed: ${result.error}`;
+                    playBtn.disabled = false;
+                    playText.textContent = 'PLAY';
+                    isDownloading = false;
+                }
+            } catch (error) {
+                progressText.textContent = `Failed: ${error.message}`;
+                playBtn.disabled = false;
+                playText.textContent = 'PLAY';
+                isDownloading = false;
+            }
+        }
+
+        function closeWindow() {
+            window.electronAPI.closeWindow();
+        }
+
+        function minimizeWindow() {
+            window.electronAPI.minimizeWindow();
+        }
+
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                launch();
+            }
+        });
+    </script>
+</body>
+</html>
