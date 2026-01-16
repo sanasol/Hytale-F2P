@@ -1,6 +1,6 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const { launchGame, saveUsername, loadUsername, saveJavaPath, loadJavaPath } = require('./backend/launcher');
+const { launchGame, saveUsername, loadUsername, saveJavaPath, loadJavaPath, saveInstallPath, loadInstallPath, isGameInstalled, uninstallGame } = require('./backend/launcher');
 
 let mainWindow;
 
@@ -10,6 +10,7 @@ function createWindow() {
     height: 720,
     frame: false,
     resizable: false,
+    alwaysOnTop: true,
     backgroundColor: '#090909',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -61,7 +62,7 @@ app.on('window-all-closed', () => {
   }
 });
 
-ipcMain.handle('launch-game', async (event, playerName, javaPath) => {
+ipcMain.handle('launch-game', async (event, playerName, javaPath, installPath) => {
   try {
     const progressCallback = (message, percent, speed, downloaded, total) => {
       if (mainWindow && !mainWindow.isDestroyed()) {
@@ -76,7 +77,7 @@ ipcMain.handle('launch-game', async (event, playerName, javaPath) => {
       }
     };
 
-    await launchGame(playerName, progressCallback, javaPath);
+    await launchGame(playerName, progressCallback, javaPath, installPath);
     
     return { success: true };
   } catch (error) {
@@ -110,4 +111,39 @@ ipcMain.handle('save-java-path', (event, javaPath) => {
 
 ipcMain.handle('load-java-path', () => {
   return loadJavaPath();
+});
+
+ipcMain.handle('save-install-path', (event, installPath) => {
+  saveInstallPath(installPath);
+  return { success: true };
+});
+
+ipcMain.handle('load-install-path', () => {
+  return loadInstallPath();
+});
+
+ipcMain.handle('select-install-path', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory'],
+    title: 'Select Installation Folder'
+  });
+  
+  if (!result.canceled && result.filePaths.length > 0) {
+    return result.filePaths[0];
+  }
+  return null;
+});
+
+ipcMain.handle('is-game-installed', () => {
+  return isGameInstalled();
+});
+
+ipcMain.handle('uninstall-game', async () => {
+  try {
+    await uninstallGame();
+    return { success: true };
+  } catch (error) {
+    console.error('Uninstall error:', error);
+    return { success: false, error: error.message };
+  }
 });
