@@ -23,12 +23,30 @@ function getAppDir() {
   }
 }
 
-const APP_DIR = getAppDir();
+const DEFAULT_APP_DIR = getAppDir();
+const CONFIG_FILE = path.join(DEFAULT_APP_DIR, 'config.json');
+
+function getResolvedAppDir(customPath) {
+  if (customPath && customPath.trim()) {
+    return path.join(customPath.trim(), 'HytaleF2P');
+  }
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+      if (config.installPath && config.installPath.trim()) {
+        return path.join(config.installPath.trim(), 'HytaleF2P');
+      }
+    }
+  } catch (err) {
+  }
+  return DEFAULT_APP_DIR;
+}
+
+const APP_DIR = DEFAULT_APP_DIR;
 const CACHE_DIR = path.join(APP_DIR, 'cache');
 const TOOLS_DIR = path.join(APP_DIR, 'butler');
 const GAME_DIR = path.join(APP_DIR, 'release', 'package', 'game', 'latest');
 const JRE_DIR = path.join(APP_DIR, 'release', 'package', 'jre', 'latest');
-const CONFIG_FILE = path.join(APP_DIR, 'config.json');
 
 function expandHome(inputPath) {
   if (!inputPath) {
@@ -218,19 +236,10 @@ function getArch() {
 }
 
 function createFolders() {
-  const dirs = [
-    APP_DIR,
-    CACHE_DIR,
-    TOOLS_DIR,
-    path.join(APP_DIR, 'release', 'package', 'jre'),
-    path.join(APP_DIR, 'release', 'package', 'game')
-  ];
-  
-  dirs.forEach(dir => {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-  });
+  const configDir = path.dirname(CONFIG_FILE);
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, { recursive: true });
+  }
 }
 
 async function downloadFile(url, dest, progressCallback) {
@@ -271,12 +280,14 @@ async function downloadFile(url, dest, progressCallback) {
   });
 }
 
-async function installButler() {
-  createFolders();
+async function installButler(toolsDir = TOOLS_DIR) {
+  if (!fs.existsSync(toolsDir)) {
+    fs.mkdirSync(toolsDir, { recursive: true });
+  }
   
   const butlerName = process.platform === 'win32' ? 'butler.exe' : 'butler';
-  const butlerPath = path.join(TOOLS_DIR, butlerName);
-  const zipPath = path.join(TOOLS_DIR, 'butler.zip');
+  const butlerPath = path.join(toolsDir, butlerName);
+  const zipPath = path.join(toolsDir, 'butler.zip');
 
   if (fs.existsSync(butlerPath)) {
     return butlerPath;
@@ -319,7 +330,7 @@ async function installButler() {
 
   console.log('Unpacking Butler...');
   const zip = new AdmZip(zipPath);
-  zip.extractAllTo(TOOLS_DIR, true);
+  zip.extractAllTo(toolsDir, true);
 
   if (process.platform !== 'win32') {
     fs.chmodSync(butlerPath, 0o755);
@@ -334,14 +345,12 @@ async function installButler() {
   return butlerPath;
 }
 
-async function downloadPWR(version = 'release', fileName = '1.pwr', progressCallback) {
-  createFolders();
-  
+async function downloadPWR(version = 'release', fileName = '1.pwr', progressCallback, cacheDir = CACHE_DIR) {
   const osName = getOS();
   const arch = getArch();
   const url = `https://game-patches.hytale.com/patches/${osName}/${arch}/${version}/0/${fileName}`;
   
-  const dest = path.join(CACHE_DIR, fileName);
+  const dest = path.join(cacheDir, fileName);
 
   if (fs.existsSync(dest)) {
     console.log('PWR file found in cache:', dest);
@@ -355,9 +364,9 @@ async function downloadPWR(version = 'release', fileName = '1.pwr', progressCall
   return dest;
 }
 
-async function applyPWR(pwrFile, progressCallback) {
-  const butlerPath = await installButler();
-  const gameLatest = GAME_DIR;
+async function applyPWR(pwrFile, progressCallback, gameDir = GAME_DIR, toolsDir = TOOLS_DIR) {
+  const butlerPath = await installButler(toolsDir);
+  const gameLatest = gameDir;
   const stagingDir = path.join(gameLatest, 'staging-temp');
   
   const clientPath = findClientPath(gameLatest);
@@ -425,13 +434,15 @@ async function applyPWR(pwrFile, progressCallback) {
   console.log('Installation complete');
 }
 
-async function downloadJRE(progressCallback) {
-  createFolders();
+async function downloadJRE(progressCallback, cacheDir = CACHE_DIR, jreDir = JRE_DIR) {
+  if (!fs.existsSync(cacheDir)) {
+    fs.mkdirSync(cacheDir, { recursive: true });
+  }
   
   const osName = getOS();
   const arch = getArch();
 
-  const bundledJava = getBundledJavaPath();
+  const bundledJava = getBundledJavaPath(jreDir);
   if (bundledJava) {
     console.log('Java runtime found, skipping download');
     return;
@@ -458,7 +469,7 @@ async function downloadJRE(progressCallback) {
   }
 
   const fileName = path.basename(platform.url);
-  const cacheFile = path.join(CACHE_DIR, fileName);
+  const cacheFile = path.join(cacheDir, fileName);
 
   if (!fs.existsSync(cacheFile)) {
     if (progressCallback) {
@@ -487,12 +498,12 @@ async function downloadJRE(progressCallback) {
     progressCallback('Unpacking Java runtime...', null, null, null, null);
   }
   console.log('Unpacking Java runtime...');
-  await extractJRE(cacheFile, JRE_DIR);
+  await extractJRE(cacheFile, jreDir);
 
   if (process.platform !== 'win32') {
     const javaCandidates = [
-      path.join(JRE_DIR, 'bin', JAVA_EXECUTABLE),
-      path.join(JRE_DIR, 'Contents', 'Home', 'bin', JAVA_EXECUTABLE)
+      path.join(jreDir, 'bin', JAVA_EXECUTABLE),
+      path.join(jreDir, 'Contents', 'Home', 'bin', JAVA_EXECUTABLE)
     ];
     for (const javaPath of javaCandidates) {
       if (fs.existsSync(javaPath)) {
@@ -501,7 +512,7 @@ async function downloadJRE(progressCallback) {
     }
   }
 
-  flattenJREDir(JRE_DIR);
+  flattenJREDir(jreDir);
 
   try {
     fs.unlinkSync(cacheFile);
@@ -584,13 +595,13 @@ function flattenJREDir(jreLatest) {
   }
 }
 
-function getBundledJavaPath() {
+function getBundledJavaPath(jreDir = JRE_DIR) {
   const candidates = [
-    path.join(JRE_DIR, 'bin', JAVA_EXECUTABLE)
+    path.join(jreDir, 'bin', JAVA_EXECUTABLE)
   ];
 
   if (process.platform === 'darwin') {
-    candidates.push(path.join(JRE_DIR, 'Contents', 'Home', 'bin', JAVA_EXECUTABLE));
+    candidates.push(path.join(jreDir, 'Contents', 'Home', 'bin', JAVA_EXECUTABLE));
   }
 
   for (const candidate of candidates) {
@@ -602,8 +613,8 @@ function getBundledJavaPath() {
   return null;
 }
 
-function getJavaExec() {
-  const bundledJava = getBundledJavaPath();
+function getJavaExec(jreDir = JRE_DIR) {
+  const bundledJava = getBundledJavaPath(jreDir);
   if (bundledJava) {
     return bundledJava;
   }
@@ -635,10 +646,51 @@ function findClientPath(gameLatest) {
   return null;
 }
 
-async function launchGame(playerName = 'Player', progressCallback, javaPathOverride) {
-  createFolders();
+function isGameInstalled() {
+  const appDir = getResolvedAppDir();
+  const gameDir = path.join(appDir, 'release', 'package', 'game', 'latest');
+  const clientPath = findClientPath(gameDir);
+  return clientPath !== null;
+}
+
+async function uninstallGame() {
+  const appDir = getResolvedAppDir();
+  
+  if (!fs.existsSync(appDir)) {
+    throw new Error('Game is not installed');
+  }
+
+  try {
+    fs.rmSync(appDir, { recursive: true, force: true });
+    console.log('Game uninstalled successfully - removed entire HytaleF2P folder');
+    
+    if (fs.existsSync(CONFIG_FILE)) {
+      const config = loadConfig();
+      delete config.installPath;
+      fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf8');
+    }
+  } catch (error) {
+    throw new Error(`Failed to uninstall game: ${error.message}`);
+  }
+}
+
+async function launchGame(playerName = 'Player', progressCallback, javaPathOverride, installPathOverride) {
+  const customAppDir = getResolvedAppDir(installPathOverride);
+  const customCacheDir = path.join(customAppDir, 'cache');
+  const customToolsDir = path.join(customAppDir, 'butler');
+  const customGameDir = path.join(customAppDir, 'release', 'package', 'game', 'latest');
+  const customJreDir = path.join(customAppDir, 'release', 'package', 'jre', 'latest');
+  
+  [customAppDir, customCacheDir, customToolsDir].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
   
   saveUsername(playerName);
+  if (installPathOverride) {
+    saveInstallPath(installPathOverride);
+  }
 
   const configuredJava = (javaPathOverride !== undefined && javaPathOverride !== null
     ? javaPathOverride
@@ -652,7 +704,7 @@ async function launchGame(playerName = 'Player', progressCallback, javaPathOverr
     }
   } else {
     try {
-      await downloadJRE(progressCallback);
+      await downloadJRE(progressCallback, customCacheDir, customJreDir);
     } catch (error) {
       const fallback = await detectSystemJava();
       if (fallback) {
@@ -663,11 +715,11 @@ async function launchGame(playerName = 'Player', progressCallback, javaPathOverr
     }
 
     if (!javaBin) {
-      javaBin = getJavaExec();
+      javaBin = getJavaExec(customJreDir);
     }
   }
 
-  const gameLatest = GAME_DIR;
+  const gameLatest = customGameDir;
   let clientPath = findClientPath(gameLatest);
 
   if (!clientPath) {
@@ -675,8 +727,8 @@ async function launchGame(playerName = 'Player', progressCallback, javaPathOverr
       progressCallback('Fetching game files...', null, null, null, null);
     }
     console.log('Game files missing, downloading and installing patch...');
-    const pwrFile = await downloadPWR('release', '1.pwr', progressCallback);
-    await applyPWR(pwrFile, progressCallback);
+    const pwrFile = await downloadPWR('release', '1.pwr', progressCallback, customCacheDir);
+    await applyPWR(pwrFile, progressCallback, customGameDir, customToolsDir);
   }
 
   clientPath = findClientPath(gameLatest);
@@ -742,11 +794,25 @@ function loadJavaPath() {
   return config.javaPath || '';
 }
 
+function saveInstallPath(installPath) {
+  const trimmed = (installPath || '').trim();
+  saveConfig({ installPath: trimmed });
+}
+
+function loadInstallPath() {
+  const config = loadConfig();
+  return config.installPath || '';
+}
+
 module.exports = {
   launchGame,
   saveUsername,
   loadUsername,
   saveJavaPath,
   loadJavaPath,
+  saveInstallPath,
+  loadInstallPath,
+  isGameInstalled,
+  uninstallGame,
   getJavaDetection
 };
