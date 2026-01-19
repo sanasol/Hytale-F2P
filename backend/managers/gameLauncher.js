@@ -1,16 +1,104 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const { spawn } = require('child_process');
+const { v4: uuidv4 } = require('uuid');
 const { getResolvedAppDir, findClientPath } = require('../core/paths');
 const { setupWaylandEnvironment } = require('../utils/platformUtils');
-const { saveUsername, saveInstallPath, loadJavaPath, getUuidForUser } = require('../core/config');
+const { saveUsername, saveInstallPath, loadJavaPath, getUuidForUser, getAuthServerUrl, getAuthDomain } = require('../core/config');
 const { resolveJavaPath, getJavaExec, getBundledJavaPath, detectSystemJava, JAVA_EXECUTABLE } = require('./javaManager');
 const { getInstalledClientVersion, getLatestClientVersion } = require('../services/versionManager');
 const { updateGameFiles } = require('./gameManager');
 
+// Client patcher for custom auth server (sanasol.ws)
+let clientPatcher = null;
+try {
+  clientPatcher = require('../utils/clientPatcher');
+} catch (err) {
+  console.log('[Launcher] Client patcher not available:', err.message);
+}
+
 const execAsync = promisify(exec);
+
+// Fetch tokens from the auth server (properly signed with server's Ed25519 key)
+async function fetchAuthTokens(uuid, name) {
+  const authServerUrl = getAuthServerUrl();
+  try {
+    console.log(`Fetching auth tokens from ${authServerUrl}/game-session/child`);
+
+    const response = await fetch(`${authServerUrl}/game-session/child`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        uuid: uuid,
+        name: name,
+        scopes: ['hytale:server', 'hytale:client']
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Auth server returned ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Auth tokens received from server');
+
+    return {
+      identityToken: data.IdentityToken || data.identityToken,
+      sessionToken: data.SessionToken || data.sessionToken
+    };
+  } catch (error) {
+    console.error('Failed to fetch auth tokens:', error.message);
+    // Fallback to local generation if server unavailable
+    return generateLocalTokens(uuid, name);
+  }
+}
+
+// Fallback: Generate tokens locally (won't pass signature validation but allows offline testing)
+function generateLocalTokens(uuid, name) {
+  console.log('Using locally generated tokens (fallback mode)');
+  const authServerUrl = getAuthServerUrl();
+  const now = Math.floor(Date.now() / 1000);
+  const exp = now + 36000;
+
+  const header = Buffer.from(JSON.stringify({
+    alg: 'EdDSA',
+    kid: '2025-10-01',
+    typ: 'JWT'
+  })).toString('base64url');
+
+  const identityPayload = Buffer.from(JSON.stringify({
+    sub: uuid,
+    name: name,
+    username: name,
+    entitlements: ['game.base'],
+    scope: 'hytale:server hytale:client',
+    iat: now,
+    exp: exp,
+    iss: authServerUrl,
+    jti: uuidv4()
+  })).toString('base64url');
+
+  const sessionPayload = Buffer.from(JSON.stringify({
+    sub: uuid,
+    scope: 'hytale:server',
+    iat: now,
+    exp: exp,
+    iss: authServerUrl,
+    jti: uuidv4()
+  })).toString('base64url');
+
+  const signature = crypto.randomBytes(64).toString('base64url');
+
+  return {
+    identityToken: `${header}.${identityPayload}.${signature}`,
+    sessionToken: `${header}.${sessionPayload}.${signature}`
+  };
+}
 
 async function launchGame(playerName = 'Player', progressCallback, javaPathOverride, installPathOverride) {
   const customAppDir = getResolvedAppDir(installPathOverride);
@@ -53,6 +141,51 @@ async function launchGame(playerName = 'Player', progressCallback, javaPathOverr
     }
   }
 
+  const uuid = getUuidForUser(playerName);
+
+  // Fetch tokens from auth server
+  if (progressCallback) {
+    progressCallback('Fetching authentication tokens...', null, null, null, null);
+  }
+  const { identityToken, sessionToken } = await fetchAuthTokens(uuid, playerName);
+
+  // Patch client and server binaries to use custom auth server (BEFORE signing on macOS)
+  const authDomain = getAuthDomain();
+  if (clientPatcher) {
+    try {
+      if (progressCallback) {
+        progressCallback('Patching game for custom server...', null, null, null, null);
+      }
+      console.log(`Patching game binaries for ${authDomain}...`);
+
+      const patchResult = await clientPatcher.ensureClientPatched(gameLatest, (msg, percent) => {
+        console.log(`[Patcher] ${msg}`);
+        if (progressCallback && msg) {
+          progressCallback(msg, percent, null, null, null);
+        }
+      });
+
+      if (patchResult.success) {
+        if (patchResult.alreadyPatched) {
+          console.log(`Game already patched for ${authDomain}`);
+        } else {
+          console.log(`Game patched successfully (${patchResult.patchCount} total occurrences)`);
+          if (patchResult.client) {
+            console.log(`  Client: ${patchResult.client.patchCount || 0} occurrences`);
+          }
+          if (patchResult.server) {
+            console.log(`  Server: ${patchResult.server.patchCount || 0} occurrences`);
+          }
+        }
+      } else {
+        console.warn('Game patching failed:', patchResult.error);
+      }
+    } catch (patchError) {
+      console.warn('Game patching failed (game may not connect to custom server):', patchError.message);
+    }
+  }
+
+  // macOS: Sign binaries AFTER patching so the patched binaries have valid signatures
   if (process.platform === 'darwin') {
     try {
       const appBundle = path.join(gameLatest, 'Client', 'Hytale.app');
@@ -66,10 +199,10 @@ async function launchGame(playerName = 'Player', progressCallback, javaPathOverr
 
       if (fs.existsSync(appBundle)) {
         await signPath(appBundle, true);
-        console.log('Signed macOS app bundle');
+        console.log('Signed macOS app bundle (after patching)');
       } else {
         await signPath(path.dirname(clientPath), true);
-        console.log('Signed macOS client binary');
+        console.log('Signed macOS client binary (after patching)');
       }
 
       if (javaBin && fs.existsSync(javaBin)) {
@@ -85,7 +218,7 @@ async function launchGame(playerName = 'Player', progressCallback, javaPathOverr
       if (fs.existsSync(serverDir)) {
         await execAsync(`xattr -cr "${serverDir}"`).catch(() => {});
         await execAsync(`find "${serverDir}" -type f -perm +111 -exec codesign --force --sign - {} \\;`).catch(() => {});
-        console.log('Signed server binaries');
+        console.log('Signed server binaries (after patching)');
       }
 
       if (javaBin && fs.existsSync(javaBin)) {
@@ -113,13 +246,14 @@ exec "$REAL_JAVA" "\${ARGS[@]}"
     }
   }
 
-  const uuid = getUuidForUser(playerName);
   const args = [
     '--app-dir', gameLatest,
     '--java-exec', javaBin,
-    '--auth-mode', 'offline',
+    '--auth-mode', 'authenticated',
     '--uuid', uuid,
     '--name', playerName,
+    '--identity-token', identityToken,
+    '--session-token', sessionToken,
     '--user-dir', userDataDir
   ];
 

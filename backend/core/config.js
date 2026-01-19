@@ -2,6 +2,35 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+// Default auth domain - can be overridden by env var or config
+const DEFAULT_AUTH_DOMAIN = 'sanasol.ws';
+
+// Get auth domain from env, config, or default
+function getAuthDomain() {
+  // First check environment variable
+  if (process.env.HYTALE_AUTH_DOMAIN) {
+    return process.env.HYTALE_AUTH_DOMAIN;
+  }
+  // Then check config file
+  const config = loadConfig();
+  if (config.authDomain) {
+    return config.authDomain;
+  }
+  // Fall back to default
+  return DEFAULT_AUTH_DOMAIN;
+}
+
+// Get full auth server URL
+function getAuthServerUrl() {
+  const domain = getAuthDomain();
+  return `https://sessions.${domain}`;
+}
+
+// Save auth domain to config
+function saveAuthDomain(domain) {
+  saveConfig({ authDomain: domain || DEFAULT_AUTH_DOMAIN });
+}
+
 function getAppDir() {
   const home = os.homedir();
   if (process.platform === 'win32') {
@@ -159,5 +188,10 @@ module.exports = {
   loadModsFromConfig,
   isFirstLaunch,
   markAsLaunched,
-  CONFIG_FILE
+  CONFIG_FILE,
+  // Auth domain config
+  DEFAULT_AUTH_DOMAIN,
+  getAuthDomain,
+  getAuthServerUrl,
+  saveAuthDomain
 };
