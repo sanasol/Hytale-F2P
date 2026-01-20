@@ -1,7 +1,7 @@
 # Maintainer: Terromur <terromuroz@proton.me>
 pkgname=Hytale-F2P-git
 _pkgname=Hytale-F2P
-pkgver=2.0.2.r90.g21f8527
+pkgver=2.0.2a.r106.gf40d010
 pkgrel=1
 pkgdesc="HyLauncher - unofficial Hytale Launcher for free to play gamers"
 arch=('x86_64')
@@ -13,7 +13,7 @@ sha256sums=('SKIP' '8c78a6931fade2b0501122980dc238e042b9f6f0292b5ca74c391d7b3c15
 
 pkgver() {
   cd "$_pkgname"
-  printf "2.0.2.r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  printf "2.0.2a.r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 build() {
