@@ -161,6 +161,19 @@ app.whenReady().then(async () => {
   console.log('Node.js version:', process.versions.node);
   console.log('Log directory:', logger.getLogDirectory());
 
+  try {
+    const { loadGpuPreference, detectGpu } = require('./backend/launcher');
+    const savedPreference = loadGpuPreference();
+    if (savedPreference === 'auto') {
+      global.detectedGpu = detectGpu(); // if 'auto' selected = preload GPU detection
+      console.log('GPU auto-detection completed on startup:', global.detectedGpu);
+    } else {
+      console.log('GPU preference is manual, skipping auto-detection');
+    }
+  } catch (error) {
+    console.warn('Failed to preload GPU detection:', error.message);
+    global.detectedGpu = { mode: 'integrated', vendor: 'intel' };
+  }
 
 
   // Initialize Profile Manager (runs migration if needed)
@@ -282,7 +295,7 @@ app.on('window-all-closed', () => {
   }
 });
 
-ipcMain.handle('launch-game', async (event, playerName, javaPath, installPath) => {
+ipcMain.handle('launch-game', async (event, playerName, javaPath, installPath, gpuPreference) => {
   try {
     const progressCallback = (message, percent, speed, downloaded, total) => {
       if (mainWindow && !mainWindow.isDestroyed()) {
@@ -297,8 +310,8 @@ ipcMain.handle('launch-game', async (event, playerName, javaPath, installPath) =
       }
     };
 
-    const result = await launchGameWithVersionCheck(playerName, progressCallback, javaPath, installPath);
-
+    const result = await launchGameWithVersionCheck(playerName, progressCallback, javaPath, installPath, gpuPreference);
+    
     return result;
   } catch (error) {
     console.error('Launch error:', error);
@@ -708,6 +721,35 @@ ipcMain.handle('open-download-page', async () => {
 
 ipcMain.handle('get-update-info', async () => {
   return updateManager.getUpdateInfo();
+});
+
+ipcMain.handle('get-gpu-info', () => {
+  try {
+    return app.getGPUInfo('complete');
+  } catch (error) {
+    console.error('Error getting GPU info:', error);
+    return {};
+  }
+});
+
+ipcMain.handle('save-gpu-preference', (event, gpuPreference) => {
+  const { saveGpuPreference } = require('./backend/launcher');
+  saveGpuPreference(gpuPreference);
+  return { success: true };
+});
+
+ipcMain.handle('load-gpu-preference', () => {
+  const { loadGpuPreference } = require('./backend/launcher');
+  return loadGpuPreference();
+});
+
+ipcMain.handle('get-detected-gpu', () => {
+  if (global.detectedGpu) {
+    return global.detectedGpu;
+  }
+  const { detectGpu } = require('./backend/launcher');
+  global.detectedGpu = detectGpu();
+  return global.detectedGpu;
 });
 
 ipcMain.handle('window-close', () => {

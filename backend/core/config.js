@@ -277,6 +277,15 @@ function loadChatColor() {
   return config.chatColor || '#3498db';
 }
 
+function saveGpuPreference(gpuPreference) {
+  saveConfig({ gpuPreference: gpuPreference || 'auto' });
+}
+
+function loadGpuPreference() {
+  const config = loadConfig();
+  return config.gpuPreference || 'auto';
+}
+
 module.exports = {
   loadConfig,
   saveConfig,
@@ -308,5 +317,8 @@ module.exports = {
   setUuidForUser,
   generateNewUuid,
   deleteUuidForUser,
-  resetCurrentUserUuid
+  resetCurrentUserUuid,
+  // GPU Preference exports
+  saveGpuPreference,
+  loadGpuPreference
 };

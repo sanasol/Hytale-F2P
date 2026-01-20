@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  launchGame: (playerName, javaPath, installPath) => ipcRenderer.invoke('launch-game', playerName, javaPath, installPath),
+  launchGame: (playerName, javaPath, installPath, gpuPreference) => ipcRenderer.invoke('launch-game', playerName, javaPath, installPath, gpuPreference),
   installGame: (playerName, javaPath, installPath) => ipcRenderer.invoke('install-game', playerName, javaPath, installPath),
   closeWindow: () => ipcRenderer.invoke('window-close'),
   minimizeWindow: () => ipcRenderer.invoke('window-minimize'),
@@ -48,6 +48,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onUpdatePopup: (callback) => {
     ipcRenderer.on('show-update-popup', (event, data) => callback(data));
   },
+  
+  getGpuInfo: () => ipcRenderer.invoke('get-gpu-info'),
+  saveGpuPreference: (gpuPreference) => ipcRenderer.invoke('save-gpu-preference', gpuPreference),
+  loadGpuPreference: () => ipcRenderer.invoke('load-gpu-preference'),
+  getDetectedGpu: () => ipcRenderer.invoke('get-detected-gpu'),
 
   acceptFirstLaunchUpdate: (existingGame) => ipcRenderer.invoke('accept-first-launch-update', existingGame),
   markAsLaunched: () => ipcRenderer.invoke('mark-as-launched'),

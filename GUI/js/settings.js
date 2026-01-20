@@ -5,6 +5,7 @@ let customJavaPath;
 let browseJavaBtn;
 let settingsPlayerName;
 let discordRPCCheck;
+let gpuPreferenceRadios;
 
 // UUID Management elements
 let currentUuidDisplay;
@@ -142,6 +143,7 @@ function showCustomConfirm(message, title = 'Confirm Action', onConfirm, onCance
   document.addEventListener('keydown', handleEscape);
 }
 
+
 export function initSettings() {
   setupSettingsElements();
   loadAllSettings();
@@ -154,6 +156,7 @@ function setupSettingsElements() {
   browseJavaBtn = document.getElementById('browseJavaBtn');
   settingsPlayerName = document.getElementById('settingsPlayerName');
   discordRPCCheck = document.getElementById('discordRPCCheck');
+  gpuPreferenceRadios = document.querySelectorAll('input[name="gpuPreference"]');
 
   // UUID Management elements
   currentUuidDisplay = document.getElementById('currentUuid');
@@ -224,6 +227,15 @@ function setupSettingsElements() {
       if (e.target === uuidModal) {
         closeUuidModal();
       }
+    });
+  }
+
+  if (gpuPreferenceRadios) {
+    gpuPreferenceRadios.forEach(radio => {
+      radio.addEventListener('change', async () => {
+        await saveGpuPreference();
+        await updateGpuLabel();
+      });
     });
   }
 }
@@ -361,11 +373,85 @@ async function loadPlayerName() {
   }
 }
 
+async function saveGpuPreference() {
+  try {
+    if (window.electronAPI && window.electronAPI.saveGpuPreference && gpuPreferenceRadios) {
+      const gpuPreference = Array.from(gpuPreferenceRadios).find(radio => radio.checked)?.value || 'auto';
+      await window.electronAPI.saveGpuPreference(gpuPreference);
+    }
+  } catch (error) {
+    console.error('Error saving GPU preference:', error);
+  }
+}
+
+async function updateGpuLabel() {
+  const detectionInfo = document.getElementById('gpu-detection-info');
+  if (!detectionInfo) return;
+
+  if (gpuPreferenceRadios) {
+    const checked = Array.from(gpuPreferenceRadios).find(radio => radio.checked);
+    if (checked) {
+      try {
+        if (window.electronAPI && window.electronAPI.getDetectedGpu) {
+          const detected = await window.electronAPI.getDetectedGpu();
+          if (checked.value === 'auto') {
+            if (detected.dedicatedName) {
+              detectionInfo.textContent = `dGPU detected, using ${detected.dedicatedName}`;
+            } else {
+              detectionInfo.textContent = `dGPU not detected, using iGPU (${detected.integratedName}) instead`;
+            }
+            detectionInfo.style.display = 'block';
+          } else if (checked.value === 'integrated') {
+            detectionInfo.textContent = `Detected: ${detected.integratedName}`;
+            detectionInfo.style.display = 'block';
+          } else if (checked.value === 'dedicated') {
+            if (detected.dedicatedName) {
+              detectionInfo.textContent = `Detected: ${detected.dedicatedName}`;
+            } else {
+              detectionInfo.textContent = `No dedicated GPU detected`;
+            }
+            detectionInfo.style.display = 'block';
+          } else {
+            detectionInfo.style.display = 'none';
+          }
+        }
+      } catch (error) {
+        console.error('Error getting detected GPU:', error);
+        detectionInfo.style.display = 'none';
+      }
+    } else {
+      detectionInfo.style.display = 'none';
+    }
+  } else {
+    detectionInfo.style.display = 'none';
+  }
+}
+
+async function loadGpuPreference() {
+  try {
+    if (window.electronAPI && window.electronAPI.loadGpuPreference && gpuPreferenceRadios) {
+      const savedPreference = await window.electronAPI.loadGpuPreference();
+      if (savedPreference) {
+        for (const radio of gpuPreferenceRadios) {
+          if (radio.value === savedPreference) {
+            radio.checked = true;
+            break;
+          }
+        }
+        await updateGpuLabel();
+      }
+    }
+  } catch (error) {
+    console.error('Error loading GPU preference:', error);
+  }
+}
+
 async function loadAllSettings() {
   await loadCustomJavaPath();
   await loadPlayerName();
   await loadCurrentUuid();
   await loadDiscordRPC();
+  await loadGpuPreference();
 }
 
 async function openGameLocation() {
