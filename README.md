@@ -85,12 +85,6 @@ See [BUILD.md](BUILD.md) for comprehensive build instructions.
 - 🛠️ **Repair Button** — Your game's broken? One button will fix them, go to Settings pane to Repair your game in one-click, **without losing any data**. If doing so did not fix your issue, please report it to us immediately!
 - 🐛 **Fixed Bugs** — Fixed issue [#84](https://github.com/amiayweb/Hytale-F2P/issues/84) where mods disappearing when game starts in previous launcher (v2.0.2a).
 
-- 🧑‍🚀 **Profiles System** — Added proper profile management: create, switch, and delete profiles. Each profile now has its own **isolated mod list**.  
-- 🔒 **Mod Isolation** — Fixed ModManager so mods are **strictly scoped to the active profile**. Browsing and installing now only affects the selected profile.  
-- 🚨 **Critical Path Fix** — Resolved a macOS bug where mods were being saved to a Windows path (`~/AppData/Local`) instead of `~/Library/Application Support`. Mods now save to the **correct location** and load properly in-game.  
-- 🛡️ **Stability Improvements** — Added an **auto-sync step before every launch** to ensure the physical mods folder always matches the active profile.  
-- 🎨 **UI Enhancements** — Added a **profile selector dropdown** and a **profile management modal**.
-
 ### 🆕 v2.0.2a *(Minor Update)*  
 - 🧑‍🚀 **Profiles System** — Added proper profile management: create, switch, and delete profiles. Each profile now has its own **isolated mod list**.  
 - 🔒 **Mod Isolation** — Fixed ModManager so mods are **strictly scoped to the active profile**. Browsing and installing now only affects the selected profile.  
