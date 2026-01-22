@@ -1,6 +1,9 @@
 const { autoUpdater } = require('electron-updater');
 const { app } = require('electron');
 const logger = require('./logger');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 
 class AppUpdater {
   constructor(mainWindow) {
@@ -98,6 +101,21 @@ class AppUpdater {
         return; // Don't show error UI for network issues
       }
       
+      // Handle SHA512 checksum mismatch - this can happen during updates, just retry
+      const isChecksumError = err.code === 'ERR_CHECKSUM_MISMATCH' ||
+                              errorMessage.includes('sha512') || 
+                              errorMessage.includes('checksum') ||
+                              errorMessage.includes('mismatch');
+      
+      if (isChecksumError) {
+        console.warn('SHA512 checksum mismatch detected - clearing cache and will retry automatically. This is normal during updates.');
+        // Clear the update cache and let it re-download
+        this.clearUpdateCache();
+        
+        // Don't show error UI - just log and let it retry automatically on next check
+        return;
+      }
+      
       // Determine if this is a critical error that prevents auto-update
       const isCriticalError = this.isCriticalUpdateError(err);
       
@@ -123,6 +141,34 @@ class AppUpdater {
           });
         }
         return;
+      }
+      
+      // Linux-specific: Handle installation permission errors
+      if (process.platform === 'linux') {
+        const errorMessage = err.message?.toLowerCase() || '';
+        const errorStack = err.stack?.toLowerCase() || '';
+        const isInstallError = errorMessage.includes('pkexec') || 
+                              errorMessage.includes('gksudo') ||
+                              errorMessage.includes('kdesudo') ||
+                              errorMessage.includes('setuid root') ||
+                              errorMessage.includes('exited with code 127') ||
+                              errorStack.includes('pacmanupdater') ||
+                              errorStack.includes('doinstall') ||
+                              errorMessage.includes('installation failed');
+        
+        if (isInstallError) {
+          console.warn('Linux installation error: Package installation requires root privileges. Manual installation required.');
+          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.webContents.send('update-error', {
+              message: 'Auto-installation requires root privileges. Please download and install the update manually.',
+              code: err.code || 'ERR_LINUX_INSTALL_PERMISSION',
+              isLinuxInstallError: true,
+              requiresManualDownload: true,
+              updateVersion: this.updateVersion
+            });
+          }
+          return;
+        }
       }
       
       // macOS-specific: Handle unsigned app errors gracefully
@@ -242,6 +288,26 @@ class AppUpdater {
     };
   }
 
+  clearUpdateCache() {
+    try {
+      // Get the cache directory based on platform
+      const cacheDir = process.platform === 'darwin' 
+        ? path.join(os.homedir(), 'Library', 'Caches', `${app.getName()}-updater`)
+        : process.platform === 'win32'
+        ? path.join(os.homedir(), 'AppData', 'Local', `${app.getName()}-updater`)
+        : path.join(os.homedir(), '.cache', `${app.getName()}-updater`);
+      
+      if (fs.existsSync(cacheDir)) {
+        fs.rmSync(cacheDir, { recursive: true, force: true });
+        console.log('Update cache cleared successfully');
+      } else {
+        console.log('Update cache directory does not exist');
+      }
+    } catch (cacheError) {
+      console.warn('Could not clear update cache:', cacheError.message);
+    }
+  }
+
   isCriticalUpdateError(err) {
     // Check for errors that prevent auto-update
     const errorMessage = err.message?.toLowerCase() || '';
@@ -277,6 +343,16 @@ class AppUpdater {
       return true;
     }
     
+    // Linux installation errors (pkexec, sudo issues)
+    if (process.platform === 'linux' && (
+        errorMessage.includes('pkexec') ||
+        errorMessage.includes('setuid root') ||
+        errorMessage.includes('exited with code 127') ||
+        errorMessage.includes('gksudo') ||
+        errorMessage.includes('kdesudo'))) {
+      return true;
+    }
+    
     // File system errors (but not "not found" for metadata files - handled above)
     if (errorMessage.includes('enoent') || errorMessage.includes('cannot find')) {
       // Only if it's not about metadata files
@@ -285,10 +361,14 @@ class AppUpdater {
       }
     }
     
-    // Generic critical error codes
+    // Generic critical error codes (but not checksum errors - those are handled separately)
     if (errorCode && (errorCode >= 100 || 
                       errorCode === 'ERR_UPDATER_INVALID_RELEASE_FEED' ||
                       errorCode === 'ERR_UPDATER_CHANNEL_FILE_NOT_FOUND')) {
+      // Don't treat checksum errors as critical - they're handled separately
+      if (errorCode === 'ERR_CHECKSUM_MISMATCH') {
+        return false;
+      }
       return true;
     }
     

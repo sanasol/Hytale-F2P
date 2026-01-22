@@ -265,6 +265,8 @@ class ClientUpdateManager {
             let message = 'Auto-update is not available. ';
             if (errorInfo.isMacSigningError) {
                 message = 'This app requires code signing for automatic updates.';
+            } else if (errorInfo.isLinuxInstallError) {
+                message = 'Auto-installation requires root privileges. Please download and install the update manually using your package manager.';
             } else if (errorInfo.message) {
                 message = errorInfo.message;
             } else {
