@@ -37,7 +37,7 @@ jobs:
             dist/*.deb
             dist/*.rpm
             dist/*.pacman
-            dist/latest*.yml
+            dist/latest-linux.yml
 
   build-windows:
     runs-on: windows-latest
