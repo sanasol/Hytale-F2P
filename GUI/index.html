@@ -51,11 +51,7 @@
                     <i class="fas fa-cog"></i>
                     <span class="nav-tooltip" data-i18n="nav.settings">Settings</span>
                 </div>
-                <div class="nav-item" data-page="skins">
-                    <i class="fas fa-user"></i>
-                    <span class="nav-tooltip" data-i18n="nav.skins">Skins</span>
-                </div>
-                <div class="nav-item" data-page="logs" id="openLogsBtn" onclick="openLogs()">
+                <div class="nav-item logs-nav-item" data-page="logs" id="openLogsBtn" onclick="openLogs()">
                     <i class="fas fa-terminal"></i>
                     <span class="nav-tooltip">Logs</span>
                 </div>
@@ -94,6 +90,9 @@
                     <button class="control-btn minimize" onclick="window.electronAPI?.minimizeWindow()">
                         <i class="fas fa-minus"></i>
                     </button>
+                    <button class="control-btn maximize" onclick="toggleMaximize()">
+                        <i class="fas fa-square"></i>
+                    </button>
                     <button class="control-btn close" onclick="window.electronAPI?.closeWindow()">
                         <i class="fas fa-times"></i>
                     </button>
@@ -104,9 +103,6 @@
                 <h1 class="game-title">
                     HY<span class="title-accent">TALE</span>
                 </h1>
-                <div class="game-tags">
-                    <span class="tag" data-i18n="header.f2p">FREE TO PLAY</span>
-                </div>
             </div>
 
             <div class="content-pages">
@@ -114,7 +110,7 @@
                     <div class="install-content">
                         <div class="install-header">
                             <h1 class="install-title">
-                                HYTA<span class="title-accent">LE</span>
+                                HY<span class="title-accent">TALE</span>
                             </h1>
                             <p class="install-subtitle" data-i18n="install.title">FREE TO PLAY LAUNCHER</p>
                         </div>
@@ -462,14 +458,6 @@
                         </div>
                     </div>
 
-                    <div id="skins-page" class="page">
-                        <div class="placeholder-content">
-                            <i class="fas fa-user text-6xl mb-4 text-purple-500"></i>
-                            <h2 data-i18n="skins.title">Skins</h2>
-                            <p data-i18n="skins.comingSoon">Skin customization coming soon...</p>
-                        </div>
-                    </div>
-
                     <div id="logs-page" class="page">
                         <div class="logs-container">
                             <div class="logs-header">
@@ -529,6 +517,20 @@
                 <span id="progressSpeed"></span>
                 <span id="progressSize"></span>
             </div>
+        </div>
+    </div>
+
+    <!-- Installation effects overlay -->
+    <div id="installationEffects" class="installation-effects" style="display: none;">
+        <div class="space-effects">
+            <div class="warp-line"></div>
+            <div class="warp-line"></div>
+            <div class="warp-line"></div>
+            <div class="warp-line"></div>
+            <div class="warp-line"></div>
+            <div class="warp-line"></div>
+            <div class="warp-line"></div>
+            <div class="warp-line"></div>
         </div>
     </div>
 

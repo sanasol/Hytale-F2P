@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   installGame: (playerName, javaPath, installPath) => ipcRenderer.invoke('install-game', playerName, javaPath, installPath),
   closeWindow: () => ipcRenderer.invoke('window-close'),
   minimizeWindow: () => ipcRenderer.invoke('window-minimize'),
+  maximizeWindow: () => ipcRenderer.invoke('window-maximize'),
   saveUsername: (username) => ipcRenderer.invoke('save-username', username),
   loadUsername: () => ipcRenderer.invoke('load-username'),
   saveChatUsername: (chatUsername) => ipcRenderer.invoke('save-chat-username', chatUsername),
@@ -43,6 +44,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onProgressComplete: (callback) => {
     ipcRenderer.on('progress-complete', () => callback());
+  },
+  onInstallationStart: (callback) => {
+    ipcRenderer.on('installation-start', () => callback());
+  },
+  onInstallationEnd: (callback) => {
+    ipcRenderer.on('installation-end', () => callback());
   },
   getUserId: () => ipcRenderer.invoke('get-user-id'),
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),

@@ -26,7 +26,7 @@ body {
     backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
-    z-index: 20;
+    z-index: 45;
 }
 
 .sidebar-logo {
@@ -107,6 +107,12 @@ body {
 
 .nav-item:hover i {
     transform: scale(1.1);
+}
+
+/* Allow logs navigation during installation */
+.logs-nav-item {
+    z-index: 100;
+    position: relative;
 }
 
 .nav-tooltip {
@@ -374,10 +380,10 @@ body {
 }
 
 .control-btn {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     cursor: pointer !important;
     transition: all 0.3s ease;
     display: flex !important;
@@ -386,16 +392,27 @@ body {
     position: relative;
     z-index: 100000 !important;
     pointer-events: auto !important;
+    backdrop-filter: blur(10px);
 }
 
 .control-btn i {
-    font-size: 0.5rem;
-    opacity: 0;
+    font-size: 0.75rem;
+    opacity: 0.7;
     transition: opacity 0.3s ease;
+    color: white;
 }
 
 .control-btn:hover i {
     opacity: 1;
+}
+
+.maximize {
+    background: rgba(34, 197, 94, 0.2);
+}
+
+.maximize:hover {
+    background: rgba(34, 197, 94, 0.4);
+    border-color: rgba(34, 197, 94, 0.5);
 }
 
 .minimize {
@@ -403,7 +420,8 @@ body {
 }
 
 .minimize:hover {
-    background: #fbbf24;
+    background: rgba(251, 191, 36, 0.4);
+    border-color: rgba(251, 191, 36, 0.5);
 }
 
 .close {
@@ -411,7 +429,8 @@ body {
 }
 
 .close:hover {
-    background: #ef4444;
+    background: rgba(239, 68, 68, 0.4);
+    border-color: rgba(239, 68, 68, 0.5);
 }
 
 
@@ -429,7 +448,7 @@ body {
 }
 
 .title-accent {
-    color: #9333ea;
+    color: #bf84f7;
     text-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
 }
 
@@ -928,15 +947,22 @@ body {
 
 
 .news-grid-horizontal {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-auto-rows: minmax(200px, 1fr);
     gap: 1rem;
-    overflow-x: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding-bottom: 1rem;
     scrollbar-width: thin;
     scrollbar-color: rgba(147, 51, 234, 0.3) transparent;
+    flex: 1;
+    min-height: 0;
+    align-content: start;
 }
 
 .news-grid-horizontal::-webkit-scrollbar {
+    width: 6px;
     height: 6px;
 }
 
@@ -954,9 +980,11 @@ body {
 }
 
 .news-grid-horizontal .news-item {
-    min-width: 300px;
-    max-width: 300px;
-    height: 200px;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: auto;
+    aspect-ratio: 16 / 9;
     flex-shrink: 0;
 }
 
@@ -988,7 +1016,7 @@ body {
 
 .news-card {
     position: relative;
-    aspect-ratio: 16/10;
+    height: 100%;
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
@@ -1500,44 +1528,55 @@ body {
 
 .progress-overlay {
     position: fixed;
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(30px);
-    border: 2px solid rgba(147, 51, 234, 0.3);
-    border-radius: 16px;
-    padding: 2rem;
-    z-index: 50;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    border-radius: 12px;
+    padding: 1.25rem;
+    z-index: 60;
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.6),
-        0 0 40px rgba(147, 51, 234, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 4px 16px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(147, 51, 234, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
     animation: progressGlow 3s ease-in-out infinite alternate;
+    cursor: move;
+    user-select: none;
+}
+
+.progress-overlay.dragging {
+    cursor: grabbing;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.7),
+        0 0 50px rgba(147, 51, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 @keyframes progressGlow {
     0% {
         box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.6),
-            0 0 40px rgba(147, 51, 234, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            0 4px 16px rgba(0, 0, 0, 0.5),
+            0 0 30px rgba(147, 51, 234, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
         border-color: rgba(147, 51, 234, 0.3);
     }
 
     100% {
         box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.6),
-            0 0 60px rgba(147, 51, 234, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        border-color: rgba(147, 51, 234, 0.5);
+            0 4px 16px rgba(0, 0, 0, 0.5),
+            0 0 40px rgba(147, 51, 234, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        border-color: rgba(147, 51, 234, 0.4);
     }
 }
 
 .progress-content {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.75rem;
 }
 
 .progress-info {
@@ -1548,7 +1587,7 @@ body {
 
 .progress-info span {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
 }
 
 #progressText {
@@ -1572,8 +1611,8 @@ body {
 #progressPercent {
     color: #9333ea;
     font-weight: 700;
-    font-size: 2rem;
-    text-shadow: 0 0 20px rgba(147, 51, 234, 0.8);
+    font-size: 1.25rem;
+    text-shadow: 0 0 15px rgba(147, 51, 234, 0.6);
     animation: percentGlow 1.5s ease-in-out infinite;
 }
 
@@ -1592,15 +1631,15 @@ body {
 }
 
 .progress-bar-container {
-    height: 16px;
+    height: 10px;
     background: linear-gradient(90deg, #1f2937, #374151);
-    border: 2px solid rgba(147, 51, 234, 0.2);
-    border-radius: 12px;
+    border: 1px solid rgba(147, 51, 234, 0.2);
+    border-radius: 8px;
     overflow: hidden;
     position: relative;
     box-shadow:
         inset 0 2px 4px rgba(0, 0, 0, 0.5),
-        0 0 20px rgba(147, 51, 234, 0.1);
+        0 0 15px rgba(147, 51, 234, 0.1);
 }
 
 .progress-bar-container::before {
@@ -1636,15 +1675,15 @@ body {
             #06b6d4 75%,
             #10b981 100%);
     background-size: 200% 100%;
-    border-radius: 10px;
+    border-radius: 6px;
     width: 0%;
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     animation: progressFlow 3s linear infinite;
     box-shadow:
-        0 0 30px rgba(147, 51, 234, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        0 0 20px rgba(147, 51, 234, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 @keyframes progressFlow {
@@ -1690,6 +1729,71 @@ body {
     font-size: 0.75rem;
     color: #9ca3af;
     text-shadow: 0 0 5px rgba(156, 163, 175, 0.3);
+}
+
+/* Installation effects */
+.installation-effects {
+    position: fixed;
+    top: 0;
+    left: 80px;
+    width: calc(100% - 80px);
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    z-index: 40;
+    pointer-events: auto;
+    overflow: hidden;
+}
+
+.space-effects {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+}
+
+.warp-line {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, 
+        transparent 0%, 
+        rgba(147, 51, 234, 0.8) 50%, 
+        transparent 100%);
+    box-shadow: 0 0 10px rgba(147, 51, 234, 0.8),
+                0 0 20px rgba(147, 51, 234, 0.4);
+    animation: warpSpeed 1.5s linear infinite;
+    opacity: 0;
+}
+
+.warp-line:nth-child(1) { left: 10%; animation-delay: 0s; }
+.warp-line:nth-child(2) { left: 25%; animation-delay: 0.2s; }
+.warp-line:nth-child(3) { left: 40%; animation-delay: 0.4s; }
+.warp-line:nth-child(4) { left: 55%; animation-delay: 0.6s; }
+.warp-line:nth-child(5) { left: 70%; animation-delay: 0.8s; }
+.warp-line:nth-child(6) { left: 85%; animation-delay: 1s; }
+.warp-line:nth-child(7) { left: 15%; animation-delay: 0.3s; }
+.warp-line:nth-child(8) { left: 60%; animation-delay: 0.7s; }
+
+@keyframes warpSpeed {
+    0% {
+        transform: translateY(-100%) scaleY(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(0%) scaleY(1);
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100%) scaleY(2);
+        opacity: 0;
+    }
 }
 
 

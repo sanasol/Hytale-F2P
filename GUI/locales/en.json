@@ -4,14 +4,12 @@
     "mods": "Mods",
     "news": "News",
     "chat": "Players Chat",
-    "settings": "Settings",
-    "skins": "Skins"
+    "settings": "Settings"
   },
   "header": {
     "playersLabel": "Players:",
     "manageProfiles": "Manage Profiles",
-    "defaultProfile": "Default",
-    "f2p": "FREE TO PLAY"
+    "defaultProfile": "Default"
   },
   "install": {
     "title": "FREE TO PLAY LAUNCHER",
@@ -147,10 +145,6 @@
   "discord": {
     "notificationText": "Join our Discord community!",
     "joinButton": "Join Discord"
-  },
-  "skins": {
-    "title": "Skins",
-    "comingSoon": "Skin customization coming soon..."
   },
   "common": {
     "confirm": "Confirm",

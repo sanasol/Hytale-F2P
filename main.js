@@ -8,6 +8,22 @@ const profileManager = require('./backend/managers/profileManager');
 
 logger.interceptConsole();
 
+// Single instance lock - prevent multiple launcher instances
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  console.log('Another instance is already running. Quitting...');
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, focus our window instead
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
+}
+
 let mainWindow;
 let updateManager;
 let discordRPC = null;
@@ -89,8 +105,10 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
+    minWidth: 900,
+    minHeight: 600,
     frame: false,
-    resizable: false,
+    resizable: true,
     alwaysOnTop: false,
     backgroundColor: '#090909',
     webPreferences: {
@@ -327,6 +345,11 @@ ipcMain.handle('launch-game', async (event, playerName, javaPath, installPath, g
 
 ipcMain.handle('install-game', async (event, playerName, javaPath, installPath) => {
   try {
+    // Signal installation start
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('installation-start');
+    }
+
     const progressCallback = (message, percent, speed, downloaded, total) => {
       if (mainWindow && !mainWindow.isDestroyed()) {
         const data = {
@@ -342,10 +365,20 @@ ipcMain.handle('install-game', async (event, playerName, javaPath, installPath) 
 
     const result = await installGame(playerName, progressCallback, javaPath, installPath);
 
+    // Signal installation end
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('installation-end');
+    }
+
     return result;
   } catch (error) {
     console.error('Install error:', error);
     const errorMessage = error.message || error.toString();
+
+    // Signal installation end on error too
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('installation-end');
+    }
 
     return { success: false, error: errorMessage };
   }
@@ -790,6 +823,16 @@ ipcMain.handle('window-close', () => {
 ipcMain.handle('window-minimize', () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.minimize();
+  }
+});
+
+ipcMain.handle('window-maximize', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
   }
 });
 

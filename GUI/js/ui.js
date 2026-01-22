@@ -479,6 +479,9 @@ function setupUI() {
   progressSpeed = document.getElementById('progressSpeed');
   progressSize = document.getElementById('progressSize');
 
+  // Setup draggable progress bar
+  setupProgressDrag();
+
   lockPlayButton(true);
 
   setTimeout(() => {
@@ -509,5 +512,92 @@ window.LauncherUI = {
   hideProgress,
   updateProgress
 };
+
+// Make installation effects globally available
+window.showInstallationEffects = showInstallationEffects;
+window.hideInstallationEffects = hideInstallationEffects;
+
+// Draggable progress bar functionality
+function setupProgressDrag() {
+  if (!progressOverlay) return;
+
+  let isDragging = false;
+  let offsetX;
+  let offsetY;
+
+  progressOverlay.addEventListener('mousedown', dragStart);
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', dragEnd);
+
+  function dragStart(e) {
+    // Only drag if clicking on the overlay itself, not on buttons or inputs
+    if (e.target.closest('.progress-bar-fill')) return;
+    
+    if (e.target === progressOverlay || e.target.closest('.progress-content')) {
+      isDragging = true;
+      progressOverlay.classList.add('dragging');
+      
+      // Get the current position of the progress overlay
+      const rect = progressOverlay.getBoundingClientRect();
+      offsetX = e.clientX - rect.left - progressOverlay.offsetWidth / 2;
+      offsetY = e.clientY - rect.top;
+    }
+  }
+
+  function drag(e) {
+    if (isDragging) {
+      e.preventDefault();
+      
+      // Calculate new position
+      const newX = e.clientX - offsetX - progressOverlay.offsetWidth / 2;
+      const newY = e.clientY - offsetY;
+
+      // Get window bounds
+      const maxX = window.innerWidth - progressOverlay.offsetWidth;
+      const maxY = window.innerHeight - progressOverlay.offsetHeight;
+      const minX = 0;
+      const minY = 0;
+
+      // Constrain to window bounds
+      const constrainedX = Math.max(minX, Math.min(newX, maxX));
+      const constrainedY = Math.max(minY, Math.min(newY, maxY));
+
+      progressOverlay.style.left = constrainedX + 'px';
+      progressOverlay.style.bottom = 'auto';
+      progressOverlay.style.top = constrainedY + 'px';
+      progressOverlay.style.transform = 'none';
+    }
+  }
+
+  function dragEnd() {
+    isDragging = false;
+    progressOverlay.classList.remove('dragging');
+  }
+}
+
+// Show/hide installation effects
+function showInstallationEffects() {
+  const installationEffects = document.getElementById('installationEffects');
+  if (installationEffects) {
+    installationEffects.style.display = 'block';
+  }
+}
+
+function hideInstallationEffects() {
+  const installationEffects = document.getElementById('installationEffects');
+  if (installationEffects) {
+    installationEffects.style.display = 'none';
+  }
+}
+
+// Toggle maximize/restore window function
+function toggleMaximize() {
+  if (window.electronAPI && window.electronAPI.maximizeWindow) {
+    window.electronAPI.maximizeWindow();
+  }
+}
+
+// Make toggleMaximize globally available
+window.toggleMaximize = toggleMaximize;
 
 document.addEventListener('DOMContentLoaded', setupUI);

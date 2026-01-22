@@ -39,6 +39,19 @@ export function setupInstallation() {
       }
     });
   }
+
+  // Setup installation effects listeners
+  if (window.electronAPI && window.electronAPI.onInstallationStart) {
+    window.electronAPI.onInstallationStart(() => {
+      showInstallationEffects();
+    });
+  }
+
+  if (window.electronAPI && window.electronAPI.onInstallationEnd) {
+    window.electronAPI.onInstallationEnd(() => {
+      hideInstallationEffects();
+    });
+  }
 }
 
 export async function installGame() {
@@ -78,12 +91,19 @@ export async function installGame() {
     }
   } catch (error) {
     const errorMsg = window.i18n ? window.i18n.t('progress.installationFailed').replace('{error}', error.message) : `Installation failed: ${error.message}`;
+    
+    // Hide installation effects on error
+    if (window.hideInstallationEffects) {
+      window.hideInstallationEffects();
+    }
+    
+    // Reset button state on error
+    resetInstallButton();
+    
     if (window.LauncherUI) {
       window.LauncherUI.updateProgress({ message: errorMsg });
-      setTimeout(() => {
-        window.LauncherUI.hideProgress();
-        resetInstallButton();
-      }, 3000);
+      // Don't hide progress bar, just update the message
+      // User can see the error and close it manually
     }
   }
 }

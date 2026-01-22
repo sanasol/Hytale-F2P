@@ -4,14 +4,12 @@
     "mods": "Mods",
     "news": "Notícias",
     "chat": "Chat de Jogadores",
-    "settings": "Configurações",
-    "skins": "Aparências"
+    "settings": "Configurações"
   },
   "header": {
     "playersLabel": "Jogadores:",
     "manageProfiles": "Gerenciar Perfis",
-    "defaultProfile": "Padrão",
-    "f2p": "FREE TO PLAY"
+    "defaultProfile": "Padrão"
   },
   "install": {
     "title": "LANÇADOR JOGO GRATUITO",
@@ -148,10 +146,7 @@
     "notificationText": "Junte-se à nossa comunidade do Discord!",
     "joinButton": "Entrar no Discord"
   },
-  "skins": {
-    "title": "Aparências",
-    "comingSoon": "Personalização de aparências em breve..."
-  },
+
   "common": {
     "confirm": "Confirmar",
     "cancel": "Cancelar",
