@@ -1,6 +1,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const fs = require('fs');
 const { launchGame, launchGameWithVersionCheck, installGame, saveUsername, loadUsername, saveChatUsername, loadChatUsername, saveChatColor, loadChatColor, saveJavaPath, loadJavaPath, saveInstallPath, loadInstallPath, saveDiscordRPC, loadDiscordRPC, saveLanguage, loadLanguage, saveCloseLauncherOnStart, loadCloseLauncherOnStart, isGameInstalled, uninstallGame, repairGame, getHytaleNews, handleFirstLaunchCheck, proposeGameUpdate, markAsLaunched } = require('./backend/launcher');
 const { retryPWRDownload } = require('./backend/managers/gameManager');
@@ -161,7 +162,60 @@ function createWindow() {
   // Initialize Discord Rich Presence
   initDiscordRPC();
 
-  // Auto-updates handled by electron-updater
+  // Configure and initialize electron-updater
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = true;
+  
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for launcher updates...');
+  });
+  
+  autoUpdater.on('update-available', (info) => {
+    console.log('Update available:', info.version);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-available', {
+        currentVersion: app.getVersion(),
+        newVersion: info.version,
+        releaseNotes: info.releaseNotes,
+        releaseDate: info.releaseDate
+      });
+    }
+  });
+  
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('Launcher is up to date:', info.version);
+  });
+  
+  autoUpdater.on('error', (err) => {
+    console.error('Error in auto-updater:', err);
+  });
+  
+  autoUpdater.on('download-progress', (progressObj) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-download-progress', {
+        percent: progressObj.percent,
+        transferred: progressObj.transferred,
+        total: progressObj.total,
+        bytesPerSecond: progressObj.bytesPerSecond
+      });
+    }
+  });
+  
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('Update downloaded:', info.version);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-downloaded', {
+        version: info.version
+      });
+    }
+  });
+  
+  // Check for updates after 3 seconds
+  setTimeout(() => {
+    autoUpdater.checkForUpdates().catch(err => {
+      console.log('Failed to check for updates:', err.message);
+    });
+  }, 3000);
 
   mainWindow.webContents.on('devtools-opened', () => {
     mainWindow.webContents.closeDevTools();
@@ -985,14 +1039,38 @@ ipcMain.handle('copy-mod-file', async (event, sourcePath, modsPath) => {
   }
 });
 
-// Auto-updates handled by electron-updater
-// ipcMain.handle('check-for-updates', ...) - removed
+// Electron-updater IPC handlers
+ipcMain.handle('check-for-updates', async () => {
+  try {
+    const result = await autoUpdater.checkForUpdates();
+    return {
+      updateAvailable: result && result.updateInfo,
+      currentVersion: app.getVersion(),
+      updateInfo: result ? result.updateInfo : null
+    };
+  } catch (error) {
+    console.error('Error checking for updates:', error);
+    return { updateAvailable: false, error: error.message };
+  }
+});
 
-// Auto-updates handled by electron-updater
-// ipcMain.handle('open-download-page', ...) - removed
+ipcMain.handle('download-update', async () => {
+  try {
+    await autoUpdater.downloadUpdate();
+    return { success: true };
+  } catch (error) {
+    console.error('Error downloading update:', error);
+    return { success: false, error: error.message };
+  }
+});
 
-// Auto-updates handled by electron-updater
-// ipcMain.handle('get-update-info', ...) - removed
+ipcMain.handle('install-update', () => {
+  autoUpdater.quitAndInstall(false, true);
+});
+
+ipcMain.handle('get-launcher-version', () => {
+  return app.getVersion();
+});
 
 ipcMain.handle('get-gpu-info', () => {
   try {

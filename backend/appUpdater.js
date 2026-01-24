@@ -15,12 +15,6 @@ class AppUpdater {
   }
 
   setupAutoUpdater() {
-    // Enable dev mode for testing (reads dev-app-update.yml)
-    // Only enable in development, not in production builds
-    if (process.env.NODE_ENV === 'development' || !app.isPackaged) {
-      autoUpdater.forceDevUpdateConfig = true;
-      console.log('Dev update mode enabled - using dev-app-update.yml');
-    }
 
     // Configure logger for electron-updater
     // Create a compatible logger interface
@@ -176,7 +170,7 @@ class AppUpdater {
         console.warn('macOS update error: App may not be code-signed. Auto-update requires code signing.');
         if (this.mainWindow && !this.mainWindow.isDestroyed()) {
           this.mainWindow.webContents.send('update-error', {
-            message: 'Auto-update requires code signing. Please download manually from GitHub.',
+            message: 'Please download manually from GitHub.',
             code: err.code,
             isMacSigningError: true,
             requiresManualDownload: true,

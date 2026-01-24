@@ -115,5 +115,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
     activate: (id) => ipcRenderer.invoke('profile-activate', id),
     delete: (id) => ipcRenderer.invoke('profile-delete', id),
     update: (id, updates) => ipcRenderer.invoke('profile-update', id, updates)
+  },
+
+  // Launcher Update API
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  downloadUpdate: () => ipcRenderer.invoke('download-update'),
+  installUpdate: () => ipcRenderer.invoke('install-update'),
+  getLauncherVersion: () => ipcRenderer.invoke('get-launcher-version'),
+  onUpdateAvailable: (callback) => {
+    ipcRenderer.on('update-available', (event, data) => callback(data));
+  },
+  onUpdateDownloadProgress: (callback) => {
+    ipcRenderer.on('update-download-progress', (event, data) => callback(data));
+  },
+  onUpdateDownloaded: (callback) => {
+    ipcRenderer.on('update-downloaded', (event, data) => callback(data));
   }
 });
