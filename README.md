@@ -295,14 +295,15 @@ This project follows **strict semantic versioning** with **numerical versions on
 - [**@Relyz1993**](https://github.com/Relyz1993) - *Server Helper & Second Developer & Project Creator*
 
 ### 🌟 Contributors  
-- [**@sanasol**](https://github.com/sanasol) - *Main Issues Fixer | Multiplayer Patcher | Beta Tester | macOS*
-- [**@Terromur**](https://github.com/Terromur) - *Main Issues Fixer | Beta Tester | Windows & Linux*
-- [**@fazrigading**](https://github.com/fazrigading) - *Main Issues Fixer | Beta Tester | Build Release Manager | Fedora*
-- [**@ericiskoolbeans**](https://github.com/ericiskoolbeans) - *Beta Tester | OS*
-- [**@chasem-dev**](https://github.com/chasem-dev) - *Issues Fixer | macOS*
-- [**@crimera**](https://github.com/crimera) - *Issues Fixer | OS*  
-- [**@Citeli-py**](https://github.com/Citeli-py) - *Issues Fixer | OS*
-- [**@Rahul-Sahani04**](https://github.com/Rahul-Sahani04) - *Issues Fixer | Beta Tester| Windows*
+- [**@sanasol**](https://github.com/sanasol) - *Main Issues fixer | Multiplayer Patcher*
+- [**@Terromur**](https://github.com/Terromur) - *Main Issues fixer | Beta tester*
+- [**@fazrigading**](https://github.com/fazrigading) - *Main Issues fixer | Beta tester*
+- [**@ericiskoolbeans**](https://github.com/ericiskoolbeans) - *Beta Tester*
+- [**@chasem-dev**](https://github.com/chasem-dev) - *Issues fixer*
+- [**@crimera**](https://github.com/crimera) - *Issues fixer*  
+- [**@Citeli-py**](https://github.com/Citeli-py) - *Issues fixer*
+- [**@Rahul-Sahani04**](https://github.com/Rahul-Sahani04) - *Issues fixer*
+- [**@xSamiVS**](https://github.com/xSamiVS) - *Language Translator*
 
 ---
 

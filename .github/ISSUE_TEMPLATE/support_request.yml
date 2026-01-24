@@ -3,6 +3,13 @@ description: Request help or support
 title: "[SUPPORT] "
 labels: ["support"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        If you need help or support with using the launcher, please fill out this support request.
+        Provide as much detail as possible so we can assist you effectively.
+        **Need a quick assistance?** Please Open-A-Ticket in our [Discord Server](https://discord.gg/gME8rUy3MB)!
+
   - type: textarea
     id: question
     attributes:
@@ -17,14 +24,18 @@ body:
     attributes:
       label: Context
       description: Provide any relevant context or background information.
-      placeholder: "I've tried..., I expected..., but got..."
+      placeholder: "I've tried..., but got..."
+    validations:
+      required: true
 
   - type: input
     id: version
     attributes:
       label: Version
       description: What version are you using?
-      placeholder: "e.g. v1.2.3"
+      placeholder: "e.g. v2.0.11 stable/pre-release"
+    validations:
+      required: true
 
   - type: dropdown
     id: platform
@@ -32,13 +43,15 @@ body:
       label: Platform
       description: What platform are you using?
       options:
-        - Windows
-        - macOS
-        - Linux
-        - iOS
-        - Android
-        - Web Browser
-        - Other
+        - Windows 10
+        - Windows 11
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Linux Ubuntu/Debian-based
+        - Linux Fedora/RHEL-based
+        - Linux Arch-based
+    validations:
+      required: true
 
   - type: textarea
     id: logs
@@ -46,6 +59,8 @@ body:
       label: Logs or Error Messages
       description: If applicable, paste any error messages or logs here.
       render: shell
+    validations:
+      required: true
 
   - type: textarea
     id: additional

@@ -3,6 +3,13 @@ description: Create a report to help us improve
 title: "[BUG] "
 labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Bug is a problem which impairs or prevents the functions of the launcher from working as intended.
+        Thanks for taking the time to fill out a bug report! 
+        Please provide as much information as you can to help us understand and reproduce the issue.
+        
   - type: textarea
     id: description
     attributes:
@@ -43,8 +50,8 @@ body:
     id: version
     attributes:
       label: Version
-      description: What version of the project are you running?
-      placeholder: "e.g. v1.2.3"
+      description: What version of the launcher are you running?
+      placeholder: "e.g. \"v2.0.11 stable/pre-release\""
     validations:
       required: true
 
@@ -54,28 +61,15 @@ body:
       label: Operating System
       description: What operating system are you using?
       options:
-        - Windows
-        - macOS
-        - Linux
-        - iOS
-        - Android
-        - Other
+        - Windows 10
+        - Windows 11
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Linux Ubuntu/Debian-based
+        - Linux Fedora/RHEL-based
+        - Linux Arch-based
     validations:
       required: true
-
-  - type: dropdown
-    id: browser
-    attributes:
-      label: Browser (if applicable)
-      description: What browser are you using?
-      options:
-        - Chrome
-        - Firefox
-        - Safari
-        - Edge
-        - Opera
-        - Other
-        - N/A
 
   - type: textarea
     id: additional

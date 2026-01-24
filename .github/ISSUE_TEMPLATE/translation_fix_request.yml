@@ -1,14 +1,14 @@
-name: Translation Request
-description: Request translation for text or content
-title: "[TRANSLATION] "
-labels: ["translation"]
+name: Translation Fix Request
+description: Request a fix of translation for text or content in the launcher
+title: "[TRANSLATION FIX] "
+labels: ["translation fix"]
 body:
   - type: input
     id: language
     attributes:
       label: Target Language
       description: What language do you want to translate to?
-      placeholder: "e.g. Spanish (es-ES), French (fr-FR)"
+      placeholder: "e.g. Spanish (es-ES), Portuguese (pt-BR), etc."
     validations:
       required: true
 
@@ -28,12 +28,11 @@ body:
       description: Provide context about where this text appears or how it's used.
       placeholder: "This text appears in..., It's used for..."
 
-  - type: input
-    id: file_location
+  - type: textarea
+    id: screenshots
     attributes:
-      label: File Location
-      description: Where is this text located in the codebase?
-      placeholder: "e.g. src/components/Button.js:15"
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
 
   - type: textarea
     id: notes

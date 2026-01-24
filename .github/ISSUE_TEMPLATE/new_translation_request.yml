@@ -1,0 +1,24 @@
+name: New Translation Request
+description: Request new language translation for text or content on the launcher
+title: "[TRANSLATION REQUEST] "
+labels: ["translation request"]
+body:
+  - type: input
+    id: language
+    attributes:
+      label: Request New Language
+      description: What language do you want our launcher to support?
+      placeholder: "e.g. German (de-DE), Russian (ru-RU), etc."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contriution_willingness
+    attributes:
+      label: Willingness to Contribute
+      description: Are you willing to help with the translation effort?
+      options:
+        - Yes, I can help translate from English to the requested language!
+        - No, I just want to request the language.
+    validations:
+      required: true
