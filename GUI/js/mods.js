@@ -1,5 +1,5 @@
 
-let API_KEY = null;
+let API_KEY = "$2a$10$bqk254NMZOWVTzLVJCcxEOmhcyUujKxA5xk.kQCN9q0KNYFJd5b32";
 const CURSEFORGE_API = 'https://api.curseforge.com/v1';
 const HYTALE_GAME_ID = 70216;
 
@@ -13,7 +13,6 @@ let modsTotalPages = 1;
 export async function initModsManager() {
   try {
     if (window.electronAPI && window.electronAPI.getEnvVar) {
-      API_KEY = await window.electronAPI.getEnvVar('CURSEFORGE_API_KEY');
       console.log('Loaded API Key:', API_KEY ? 'Yes' : 'No');
     }
   } catch (err) {
