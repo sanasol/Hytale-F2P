@@ -1,21 +1,23 @@
-# 🎮 Hytale F2P Launcher | Cross-Platform Multiplayer Support 🪟 🍎 🐧
-
 <div align="center">
 
-![Version](https://img.shields.io/badge/Version-2.0.2-green?style=for-the-badge)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=for-the-badge)
-![License](https://img.shields.io/badge/License-Educational-blue?style=for-the-badge)
+<header>
+  <h1>🎮 Hytale F2P Launcher | Cross-Platform Multiplayer Support 🖥</h1>
+  <h2>Available for Windows 🪟, macOS 🍎, and Linux 🐧</h2>
+  <p><small>An unofficial cross-platform launcher for Hytale with automatic updates and multiplayer support (all OS supported)</small></p>
+</header>
 
-**An unofficial cross-platform launcher for Hytale with automatic updates and multiplayer support (all OS supported)**
+![Version](https://img.shields.io/badge/Version-2.1.0-green?style=for-the-badge)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-orange?style=for-the-badge)
+![License](https://img.shields.io/badge/License-Educational-blue?style=for-the-badge)
 
 [![GitHub stars](https://img.shields.io/github/stars/amiayweb/Hytale-F2P?style=social)](https://github.com/amiayweb/Hytale-F2P/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/amiayweb/Hytale-F2P?style=social)](https://github.com/amiayweb/Hytale-F2P/network/members)
 
 ⭐ **If you find this project useful, please give it a STAR!** ⭐
 
-🛑 **Found a problem? Join the Discord and Select #Open-A-Ticket!: https://discord.gg/gME8rUy3MB** 🛑
-
 ⚠️ **READ [QUICK START](https://github.com/amiayweb/Hytale-F2P/tree/main?tab=readme-ov-file#-quick-start) before Downloading & Installing the Launcher!** ⚠️
+
+🛑 **Found a problem? Join the Discord and Select #Open-A-Ticket!: https://discord.gg/gME8rUy3MB** 🛑
 
 </div>
 
@@ -23,19 +25,41 @@
 ## 📸 Screenshots
 
 <div align="center">
-  <h3>Hytale F2P Launcher</h3>
-  <img src="https://i.imgur.com/9iDuzST.png" alt="Hytale F2P Launcher" width="1000">
+  <img src="https://i.imgur.com/xW9do3d.png" alt="Hytale F2P Launcher" width="1000">
   <details>
-    <summary><b>View Mods Preview</b></summary>
-    <img src="https://i.imgur.com/NaareIS.png" alt="Hytale F2P Mods" width="1000">
-  </details>
-  <details>
-    <summary><b>View Latest News</b></summary>
-    <img src="https://i.imgur.com/n1nEqRS.png" alt="Hytale F2P News" width="1000">
-  </details>
-  <details>
-    <summary><b>View Social & Chat</b></summary>
-    <img src="https://i.imgur.com/Y4hL3sx.png" alt="Hytale F2P Chat" width="1000">
+    <summary><b>View Hytale F2P Gallery</b></summary>
+    <table style="width: 100%; border-spacing: 15px; border-collapse: separate;">
+      <tr>
+        <td align="center" style="vertical-align: top; width: 50%;">
+          <b>Mods Preview</b><br>
+          <img src="https://i.imgur.com/f8qyIJy.png" alt="Hytale F2P Mods" width="100%">
+        </td>
+        <td align="center" style="vertical-align: top; width: 50%;">
+          <b>Latest News</b><br>
+          <img src="https://i.imgur.com/qu0HltD.png" alt="Hytale F2P News" width="100%">
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="vertical-align: top; width: 50%;">
+          <b>Social & Chat</b><br>
+          <img src="https://i.imgur.com/t3GmbfF.png" alt="Hytale F2P Chat" width="100%">
+        </td>
+        <td align="center" style="vertical-align: top; width: 50%;">
+          <b>Settings</b><br>
+          <img src="https://i.imgur.com/uUD7lDB.png" alt="Hytale F2P Settings" width="100%">
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="vertical-align: top; width: 50%;">
+          <b>In-Game Screenshot-1</b><br>
+          <img src="https://i.imgur.com/X8lNFQ7.png" alt="Hytale F2P In-Game Screenshot-1" width="100%">
+        </td>
+        <td align="center" style="vertical-align: top; width: 50%;">
+          <b>In-Game Screenshot-2</b><br>
+          <img src="https://i.imgur.com/3iRScPa.png" alt="Hytale F2P In-Game Screenshot-2" width="100%">
+        </td>
+      </tr>
+    </table>
   </details>
 </div>
 
@@ -65,7 +89,9 @@
 
 ### 🎮 Hytale Hardware Requirements
 
-Hytale is designed to be accessible while scaling for high-end performance. Below are the [official system requirements for the Early Access](https://hytale.com/news/2025/12/hytale-hardware-requirements) release.
+> [!INFO]
+> Hytale is designed to be accessible while scaling for high-end performance. 
+> Below are the [official system requirements for the Early Access](https://hytale.com/news/2025/12/hytale-hardware-requirements) release.
 
 <div align="center">
 
@@ -134,6 +160,8 @@ Hytale is designed to be accessible while scaling for high-end performance. Belo
 > [!WARNING]
 > Ubuntu-based Distro like ZorinOS or Pop!_OS or Linux Mint would encounter issues due to UbuntuLTS environment, [check this Discord post](https://discord.com/channels/1462260103951421493/1463662398501027973).
 
+* Make sure you have already installed newest **GPU driver**, consult your distro docs or wiki.
+
 * Install `libpng` package to avoid SDL3_Image error:
   * `libpng16-16 libpng-dev` for Ubuntu/Debian-based Distro
   * `libpng libpng-devel` for Fedora/RHEL-based Distro
@@ -159,7 +187,7 @@ Hytale is designed to be accessible while scaling for high-end performance. Belo
 1. Download .DMG file from the from [**Releases**](https://github.com/amiayweb/Hytale-F2P/releases/latest/).
 2. Run the file.
 3. If says "Apple could not verify ...", go to System Settings > Privacy & Security > Scroll to bottom, find "Hytale F2P Launcher" > press Open Anyway.
-4. Alterative: You can also use the .zip. // TODO: NEEDS MORE INFORMATION
+4. Advanced: You can also use the .zip. // TODO: NEEDS MORE INFORMATION
 
 --- 
 
