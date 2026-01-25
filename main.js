@@ -41,7 +41,7 @@ let mainWindow;
 let discordRPC = null;
 
 // Discord Rich Presence setup
-const DISCORD_CLIENT_ID = 1462244937868513373;
+const DISCORD_CLIENT_ID = "1462244937868513373";
 
 function initDiscordRPC() {
   try {
@@ -93,7 +93,7 @@ function setDiscordActivity() {
   }
 }
 
-function toggleDiscordRPC(enabled) {
+async function toggleDiscordRPC(enabled) {
   console.log('Toggling Discord RPC:', enabled);
 
   if (enabled && !discordRPC) {
@@ -103,11 +103,12 @@ function toggleDiscordRPC(enabled) {
     try {
       console.log('Disconnecting Discord RPC...');
       discordRPC.clearActivity();
+      await new Promise(r => setTimeout(r, 100));
       discordRPC.destroy();
-      discordRPC = null;
       console.log('Discord RPC disconnected successfully');
     } catch (error) {
       console.error('Error disconnecting Discord RPC:', error.message);
+    } finally {
       discordRPC = null;
     }
   }
@@ -378,23 +379,18 @@ app.whenReady().then(async () => {
   }, 3000);
 });
 
-function cleanupDiscordRPC() {
-  if (discordRPC) {
-    try {
-      console.log('Cleaning up Discord RPC...');
-      discordRPC.clearActivity();
-      setTimeout(() => {
-        try {
-          discordRPC.destroy();
-        } catch (error) {
-          console.log('Error during final Discord RPC cleanup:', error.message);
-        }
-      }, 100);
-      discordRPC = null;
-    } catch (error) {
-      console.log('Error cleaning up Discord RPC:', error.message);
-      discordRPC = null;
-    }
+async function cleanupDiscordRPC() {
+  if (!discordRPC) return;
+  try {
+    console.log('Cleaning up Discord RPC...');
+    discordRPC.clearActivity();
+    await new Promise(r => setTimeout(r, 100));
+    discordRPC.destroy();
+    console.log('Discord RPC cleaned up successfully');
+  } catch (error) {
+    console.log('Error cleaning up Discord RPC:', error.message);
+  } finally {
+    discordRPC = null;
   }
 }
 
@@ -405,9 +401,6 @@ app.on('before-quit', () => {
 
 app.on('window-all-closed', () => {
   console.log('=== LAUNCHER CLOSING ===');
-
-  cleanupDiscordRPC();
-
   app.quit();
 });
 

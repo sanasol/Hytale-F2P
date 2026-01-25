@@ -1,7 +1,7 @@
 <div align="center">
 
 <header>
-  <h1>🎮 Hytale F2P Launcher | Cross-Platform Multiplayer Support 🖥</h1>
+  <h1>🎮 Hytale F2P Launcher | Cross-Platform Multiplayer 🖥️</h1>
   <h2>Available for Windows 🪟, macOS 🍎, and Linux 🐧</h2>
   <p><small>An unofficial cross-platform launcher for Hytale with automatic updates and multiplayer support (all OS supported)</small></p>
 </header>
@@ -15,7 +15,7 @@
 
 ⭐ **If you find this project useful, please give it a STAR!** ⭐
 
-⚠️ **READ [QUICK START](https://github.com/amiayweb/Hytale-F2P/tree/main?tab=readme-ov-file#-quick-start) before Downloading & Installing the Launcher!** ⚠️
+### ⚠️ **READ [QUICK START](https://github.com/amiayweb/Hytale-F2P/tree/main?tab=readme-ov-file#-quick-start) before Downloading & Installing the Launcher!** ⚠️
 
 🛑 **Found a problem? Join the Discord and Select #Open-A-Ticket!: https://discord.gg/gME8rUy3MB** 🛑
 
@@ -27,7 +27,7 @@
 <div align="center">
   <img src="https://i.imgur.com/xW9do3d.png" alt="Hytale F2P Launcher" width="1000">
   <details>
-    <summary><b>View Hytale F2P Gallery</b></summary>
+    <summary><b>View Gallery</b></summary>
     <table style="width: 100%; border-spacing: 15px; border-collapse: separate;">
       <tr>
         <td align="center" style="vertical-align: top; width: 50%;">
@@ -51,11 +51,11 @@
       </tr>
       <tr>
         <td align="center" style="vertical-align: top; width: 50%;">
-          <b>In-Game Screenshot-1</b><br>
+          <b>In-Game Screenshot - Spawn Point</b><br>
           <img src="https://i.imgur.com/X8lNFQ7.png" alt="Hytale F2P In-Game Screenshot-1" width="100%">
         </td>
         <td align="center" style="vertical-align: top; width: 50%;">
-          <b>In-Game Screenshot-2</b><br>
+          <b>In-Game Screenshot - Gameplay Terrain</b><br>
           <img src="https://i.imgur.com/3iRScPa.png" alt="Hytale F2P In-Game Screenshot-2" width="100%">
         </td>
       </tr>
@@ -89,7 +89,7 @@
 
 ### 🎮 Hytale Hardware Requirements
 
-> [!INFO]
+> [!IMPORTANT]
 > Hytale is designed to be accessible while scaling for high-end performance. 
 > Below are the [official system requirements for the Early Access](https://hytale.com/news/2025/12/hytale-hardware-requirements) release.
 
@@ -171,27 +171,77 @@
 
 ## 📥 Installation
 
-### 🪟 Windows
-1. Make sure you have installed all [**Windows Prequisites**](https://github.com/amiayweb/Hytale-F2P/tree/main?tab=readme-ov-file#-windows-prequisites) above.
-2. Download the latest `Hytale-F2P-Launcher.exe` from [**Releases**](https://github.com/amiayweb/Hytale-F2P/releases/latest/).
-3. Run the EXE.
-4. Launch from Desktop or Start menu.
+### 🪟 Windows Installation
 
-### 🐧 Linux
-1. Make sure you have installed all [**Linux Prequisites**](https://github.com/amiayweb/Hytale-F2P/tree/main?tab=readme-ov-file#-linux-prequisites) above.
-2. Download the latest `Hytale-F2P-Launcher.AppImage` or any specific-packages in accordance with your distro from [**Releases**](https://github.com/amiayweb/Hytale-F2P/releases/latest/).
-3. Give permission to the file (`chmod +x <filename>`).
-4. Run the file by double-clicking, or via Terminal (`./<filename>`), or find it via Desktop/App Library.
+1. **Prerequisites:** Ensure you have installed all [**Windows Prerequisites**](https://github.com/amiayweb/Hytale-F2P/tree/main?tab=readme-ov-file#-windows-prequisites) listed above.
+2. **Download:** Get the latest `Hytale-F2P-Launcher.exe` from the [**Releases**](https://github.com/amiayweb/Hytale-F2P/releases/latest/) page.
+3. **SmartScreen Note:** Since the executable is currently unsigned, Windows may show a "Windows protected your PC" popup.
+    * Click **More info**.
+    * Click **Run anyway**.
+4. **Launch:** Once installed, you can launch the app directly from your Desktop or the Start menu.
 
-### 🍎 macOS  
-1. Download .DMG file from the from [**Releases**](https://github.com/amiayweb/Hytale-F2P/releases/latest/).
-2. Run the file.
-3. If says "Apple could not verify ...", go to System Settings > Privacy & Security > Scroll to bottom, find "Hytale F2P Launcher" > press Open Anyway.
-4. Advanced: You can also use the .zip. // TODO: NEEDS MORE INFORMATION
+---
+
+### 🐧 Linux Installation
+
+1. **Prerequisites:** Ensure you have installed all [**Linux Prerequisites**](https://github.com/amiayweb/Hytale-F2P/tree/main?tab=readme-ov-file#-linux-prequisites) above.
+2. **Download:** Choose the package that fits your distribution from the [**Releases**](https://github.com/amiayweb/Hytale-F2P/releases/latest/) page:
+   * **Universal:** `.AppImage`
+   * **Arch Linux:** `.pkg.tar.zst`
+   * **Fedora/RHEL/openSUSE:** `.rpm`
+   * **Debian/Ubuntu:** `.deb`
+3. **Permissions & Execution:**
+   * **AppImage:** Make the file executable and run it:
+     ```bash
+     chmod +x Hytale-F2P-Launcher.AppImage
+     ./Hytale-F2P-Launcher.AppImage
+     ```
+   * **Fedora (dnf):** Install the RPM:
+     ```bash
+     sudo dnf install ./Hytale-F2P-Launcher.rpm
+     ```
+   * **Debian/Ubuntu (apt):** Install the DEB:
+     ```bash
+     sudo apt install ./Hytale-F2P-Launcher.deb
+     ```
+   * **Arch Linux (pacman):** Install the package using:
+     ```bash
+     sudo pacman -U /path/to/Hytale-F2P-Launcher.pkg.tar.zst
+     ```
+4. **Troubleshooting:**
+   * **FUSE:** If the AppImage fails to launch on newer distributions, ensure `libfuse2` (or `fuse2` on Arch/Fedora) is installed.
+   * **Desktop Entry:** After installing via `.rpm`, `.deb`, or `.pkg.tar.zst`, the launcher should automatically appear in your App Library/Grid.
+
+---
+
+### 🍎 macOS Installation  
+
+> [!NOTE]
+> Apple Silicon Users: If you are on an M1, M2, or M3 Mac, you may be prompted to install Rosetta 2 the first time you run the launcher. This is normal and required for compatibility.
+
+1. **Download:** Get the latest `.dmg` file from the [**Releases**](https://github.com/amiayweb/Hytale-F2P/releases/latest/) page.
+2. **Mount:** Double-click the `.dmg` file to open it.
+3. **Install:** Drag the **Hytale F2P Launcher** icon into your **Applications** folder.
+4. **First Run:** If macOS prevents the app from opening because it is from an "unidentified developer":
+    * Open **System Settings** > **Privacy & Security**.
+    * Scroll down to the **Security** section.
+    * Look for the message regarding "Hytale F2P Launcher" and click **Open Anyway**.
+    * Authenticate with your password and click **Open**.
+
+#### **Advanced: Manual Installation (.zip)**
+The `.zip` version is useful for users who prefer a portable installation or need to bypass specific permission issues.
+
+1. **Extract:** Download and unzip the file to your desired location (e.g., `~/Applications`).
+2. **Remove Quarantine:** macOS often "quarantines" apps downloaded via browser. If the app won't open, open **Terminal** and run:
+   ```bash
+   xattr -rd com.apple.quarantine /path/to/Hytale-F2P-Launcher.app
+   ```
+> [!TIP]
+> Type the first part of the command, then drag the app icon into the Terminal window to auto-fill the path.
 
 --- 
 
-# Server
+# How to Host a Server
 
 ## Host your Singleplayer Server (Online-Play Feature)
 
@@ -205,14 +255,16 @@
 ## Dedicated Server
 
 > [!NOTE]
-> Only Hytale-F2P-Server.rar file is needed to set it up on non-playing hardware (such as VPS/server hosting).
-> Only HytaleServer.jar needed to use your "Server" folder made by the launcher to host local dedicated server. 
-> Use services like Playit.gg, Tailscale, Radmin VPN to share UDP connection if setting up router is not possible.
+> If you have already  `HytaleServer.jar` in `HytaleF2P/{release/pre-release}/package/game/latest/Server`, you can use it to host local dedicated server. 
+
+> [!TIP]
+> Use services like Playit.gg, Tailscale, Radmin VPN to share UDP connection if setting up router as an admin is not possible.
+
+> [!WARNING]
+> `Hytale-F2P-Server.rar` file is needed to set up a server on non-playing hardware (such as VPS/server hosting).
 
 > [!IMPORTANT]
 > See detailed information of setting up a server here: [SERVER.md](SERVER.md)
-
-// TODO: Server.md would be used as a detailed information to avoid confuses)
 
 ---
 
@@ -222,29 +274,21 @@ See [BUILD.md](BUILD.md) for comprehensive build instructions.
 
 ---
 
-// TODO: this part needs to be written in dev notes
-
-## 📌 Versioning Policy
-
-**⚠️ Important: Semantic Versioning Required**
-
-This project follows **strict semantic versioning** with **numerical versions only**:
-
-- ✅ **Valid**: `2.0.1`, `2.0.11`, `2.1.0`, `3.0.0`
-- ❌ **Invalid**: `2.0.2b`, `2.0.2a`, `2.0.1-beta`, `v2.0.2b`
-
-**Format**: `MAJOR.MINOR.PATCH` (e.g., `2.0.11`)
-
-- **MAJOR**: Breaking changes
-- **MINOR**: New features (backward compatible)
-- **PATCH**: Bug fixes (backward compatible)
-
-**Why?** The auto-update system requires semantic versioning for proper version comparison. Letter suffixes (like `2.0.2b`) are not supported and will cause update detection issues.
-
----
-
 ## 📋 Changelog
-// TODO: CHANGELOG SHOULD BE IN `CHANGELOG.MD`
+
+### 🆕 v2.1.0
+
+- 🚨 **Auto-Retry Downloads and Auto-Patch Files** —  
+- ⚡ **Hardware Acceleration** — 
+- 👨‍💻 **In-App Logging** — 
+- 🛠️ **Repair Button** — Y
+- 🔎 **Browse CurseForge Mods** — Browsing mods now easier with our dedicated CurseForge API Key.
+- 🌎 **Fixes and Release New Translation** — Fixed 🇪🇸 🇧🇷 and added more translation for current build. Turkish 🇹🇷 language now added.
+
+
+
+<details>
+<summary>Click here to see older Changelogs</summary>
 
 ### 🆕 v2.0.2b *(Minor Update: Performance & Utilities)*  
 - 🌎 **Language Translation** — A big welcome for Spanish 🇪🇸 and Portuguese (Brazil) 🇧🇷 players! **Language setting can be found in the bottom part of Settings pane.**
@@ -253,14 +297,15 @@ This project follows **strict semantic versioning** with **numerical versions on
 - 🛠️ **Repair Button** — Your game's broken? One button will fix them, go to Settings pane to Repair your game in one-click, **without losing any data**. If doing so did not fix your issue, please report it to us immediately!
 - 🐛 **Fixed Bugs** — Fixed issue [#84](https://github.com/amiayweb/Hytale-F2P/issues/84) where mods disappearing when game starts in previous launcher (v2.0.2a).
 
-### 🆕 v2.0.2a *(Minor Update)*  
+
+### 🔄 v2.0.2a *(Minor Update)*  
 - 🧑‍🚀 **Profiles System** — Added proper profile management: create, switch, and delete profiles. Each profile now has its own **isolated mod list**.  
 - 🔒 **Mod Isolation** — Fixed ModManager so mods are **strictly scoped to the active profile**. Browsing and installing now only affects the selected profile.  
 - 🚨 **Critical Path Fix** — Resolved a macOS bug where mods were being saved to a Windows path (`~/AppData/Local`) instead of `~/Library/Application Support`.
 - 🛡️ **Stability Improvements** — Added an **auto-sync step before every launch** to ensure the physical mods folder always matches the active profile.  
 - 🎨 **UI Enhancements** — Added a **profile selector dropdown** and a **profile management modal**.
   
-### 🆕 v2.0.2 
+### 🔄 v2.0.2 
 - 🎮 **Discord RPC Integration** - Added Discord Rich Presence with toggle in settings (enabled by default)
 - 🌐 **Cross-Platform Multiplayer** - Added multiplayer patch support for Windows, Linux, and macOS
 - 🎨 **Chat Improvements** - Simplified chat color system
@@ -305,7 +350,7 @@ This project follows **strict semantic versioning** with **numerical versions on
 - ☕ **Java Management** - Automatic Java runtime handling
 - 🎨 **Modern Interface** - Clean, intuitive design
 - 🌟 **First Release** - Core launcher functionality
-
+</details>
 ---
 
 ## 👥 Contributors
