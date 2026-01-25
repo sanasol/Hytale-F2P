@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
+      - run: npm ci
 
       # ONLY RUNS ON LINUX: Required for pacman/bsdtar
       - name: Install Linux build dependencies
