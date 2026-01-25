@@ -2,7 +2,7 @@
 
 <header>
   <h1>🎮 Hytale F2P Launcher | Cross-Platform Multiplayer 🖥️</h1>
-  <h2>Available for Windows 🪟, macOS 🍎, and Linux 🐧</h2>
+  <h3>Available for Windows 🪟, macOS 🍎, and Linux 🐧</h3>
   <p><small>An unofficial cross-platform launcher for Hytale with automatic updates and multiplayer support (all OS supported)</small></p>
 </header>
 
@@ -18,6 +18,15 @@
 ### ⚠️ **READ [QUICK START](https://github.com/amiayweb/Hytale-F2P/tree/main?tab=readme-ov-file#-quick-start) before Downloading & Installing the Launcher!** ⚠️
 
 🛑 **Found a problem? Join the Discord and Select #Open-A-Ticket!: https://discord.gg/gME8rUy3MB** 🛑
+
+<p>
+  If you like the project, <b>feel free to support us via Buy Me a Coffee!</b>
+  Any support is appreciated and helps keep the project going.
+</p>
+
+<a href="https://buymeacoffee.com/hf2p">
+  <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExem14OW1tanN3eHlyYmR4NW1sYmJkOTZmbmJxejdjZXB6MXY5cW12MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/TDQOtnWgsBx99cNoyH/giphy.gif" width="120">
+</a>
 
 </div>
 
