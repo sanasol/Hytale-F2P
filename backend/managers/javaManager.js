@@ -9,7 +9,7 @@ const tar = require('tar');
 const { expandHome, JRE_DIR } = require('../core/paths');
 const { getOS, getArch } = require('../utils/platformUtils');
 const { loadConfig } = require('../core/config');
-const { downloadFile } = require('../utils/fileManager');
+const { downloadFile, retryDownload } = require('../utils/fileManager');
 
 const execFileAsync = promisify(execFile);
 const JAVA_EXECUTABLE = 'java' + (process.platform === 'win32' ? '.exe' : '');
@@ -188,6 +188,20 @@ async function getJavaDetection() {
   };
 }
 
+// Manual retry function for JRE downloads
+async function retryJREDownload(url, cacheFile, progressCallback) {
+  console.log('Initiating manual JRE retry...');
+  
+  // Ensure cache directory exists before retrying
+  const cacheDir = path.dirname(cacheFile);
+  if (!fs.existsSync(cacheDir)) {
+    console.log('Creating JRE cache directory:', cacheDir);
+    fs.mkdirSync(cacheDir, { recursive: true });
+  }
+  
+  return await retryDownload(url, cacheFile, progressCallback);
+}
+
 async function downloadJRE(progressCallback, cacheDir, jreDir = JRE_DIR) {
   if (!fs.existsSync(cacheDir)) {
     fs.mkdirSync(cacheDir, { recursive: true });
@@ -230,7 +244,40 @@ async function downloadJRE(progressCallback, cacheDir, jreDir = JRE_DIR) {
       progressCallback('Fetching Java runtime...', null, null, null, null);
     }
     console.log('Fetching Java runtime...');
-    await downloadFile(platform.url, cacheFile, progressCallback);
+    let jreFile;
+    try {
+      jreFile = await downloadFile(platform.url, cacheFile, progressCallback);
+      
+      // If downloadFile returns false or undefined, it means the download failed
+      // We should retry the download with a manual retry
+      if (!jreFile || typeof jreFile !== 'string') {
+        console.log('[JRE Download] JRE file download failed or incomplete, attempting retry...');
+        jreFile = await retryJREDownload(platform.url, cacheFile, progressCallback);
+      }
+      
+      // Double-check we have a valid file
+      if (!jreFile || typeof jreFile !== 'string') {
+        throw new Error(`JRE download failed: received invalid path ${jreFile}. Please retry download.`);
+      }
+      
+    } catch (downloadError) {
+      console.error('[JRE Download] JRE download failed:', downloadError.message);
+      
+      // Enhance error with retry information for the UI
+      const enhancedError = new Error(`JRE download failed: ${downloadError.message}`);
+      enhancedError.originalError = downloadError;
+      enhancedError.canRetry = downloadError.isConnectionLost ? false : (downloadError.canRetry !== false);
+      enhancedError.jreUrl = platform.url;
+      enhancedError.jreDest = cacheFile;
+      enhancedError.osName = osName;
+      enhancedError.arch = arch;
+      enhancedError.fileName = fileName;
+      enhancedError.cacheDir = cacheDir;
+      enhancedError.isJREError = true; // Flag to identify JRE errors
+      enhancedError.isConnectionLost = downloadError.isConnectionLost || false;
+      
+      throw enhancedError;
+    }
     console.log('Download finished');
   }
 

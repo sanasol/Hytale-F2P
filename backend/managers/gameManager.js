@@ -520,9 +520,17 @@ async function installGame(playerName = 'Player', progressCallback, javaPathOver
     try {
       await downloadJRE(progressCallback, customCacheDir, customJreDir);
     } catch (error) {
+      // Don't immediately fall back to system Java for JRE download errors - let user retry
+      if (error.isJREError) {
+        console.error('[Install] JRE download failed, allowing user retry:', error.message);
+        throw error; // Re-throw JRE errors to trigger retry UI
+      }
+      
+      // For non-download JRE errors, fall back to system Java
       const fallback = await detectSystemJava();
       if (fallback) {
         javaBin = fallback;
+        console.log('[Install] Using system Java as fallback');
       } else {
         throw error;
       }

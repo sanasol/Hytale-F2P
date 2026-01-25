@@ -619,9 +619,17 @@
                 <div id="progressErrorMessage" class="progress-error-message"></div>
                 <div class="progress-retry-section">
                     <span id="progressRetryInfo" class="progress-retry-info"></span>
-                    <button id="progressRetryBtn" class="progress-retry-btn" style="display: none;">
-                        🔄 Retry Download
-                    </button>
+                    <div class="progress-retry-buttons">
+                        <button id="progressJRRetryBtn" class="progress-retry-btn" style="display: none;">
+                            Retry Java Download
+                        </button>
+                        <button id="progressPWRRetryBtn" class="progress-retry-btn" style="display: none;">
+                            Retry Game Download
+                        </button>
+                        <button id="progressRetryBtn" class="progress-retry-btn" style="display: none;">
+                            Retry Download
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -777,7 +785,11 @@
                 <a href="https://github.com/ericiskoolbeans" target="_blank"
                     class="text-blue-400 hover:text-blue-300 transition-colors">@ericiskoolbeans</a>,
                 <a href="https://github.com/fazrigading" target="_blank"
-                    class="text-blue-400 hover:text-blue-300 transition-colors">@fazrigading</a>
+                    class="text-blue-400 hover:text-blue-300 transition-colors">@fazrigading</a>,
+                <a href="https://github.com/Rahul-Sahani04" target="_blank"
+                    class="text-blue-400 hover:text-blue-300 transition-colors">@Rahul-Sahani04</a>,
+                <a href="https://github.com/xSamiVS" target="_blank"
+                    class="text-blue-400 hover:text-blue-300 transition-colors">@xSamiVS</a>
             </span>
         </div>
     </footer>
@@ -846,6 +858,7 @@
     <script src="js/i18n.js"></script>
     <script type="module" src="js/settings.js"></script>
     <script type="module" src="js/update.js"></script>
+    <script src="js/updater.js"></script>
 </body>
 
 

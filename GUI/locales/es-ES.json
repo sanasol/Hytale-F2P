@@ -14,9 +14,11 @@
   "install": {
     "title": "LAUNCHER GRATUITO",
     "playerName": "Nombre del Jugador",
-    "playerNamePlaceholder": "Ingresa tu nombre",    "gameBranch": "Versión del Juego",
+    "playerNamePlaceholder": "Ingresa tu nombre",
+    "gameBranch": "Versión del Juego",
     "releaseVersion": "Lanzamiento (Estable)",
-    "preReleaseVersion": "Pre-Lanzamiento (Experimental)",    "customInstallation": "Instalación Personalizada",
+    "preReleaseVersion": "Pre-Lanzamiento (Experimental)",
+    "customInstallation": "Instalación Personalizada",
     "installationFolder": "Carpeta de Instalación",
     "pathPlaceholder": "Ubicación predeterminada",
     "browse": "Examinar",
@@ -55,7 +57,9 @@
     "noDescription": "Sin descripción disponible",
     "confirmDelete": "¿Estás seguro de que quieres eliminar \"{name}\"?",
     "confirmDeleteDesc": "Esta acción no se puede deshacer.",
-    "confirmDeletion": "Confirmar eliminación"
+    "confirmDeletion": "Confirmar eliminación",
+    "apiKeyRequired": "Clave API Requerida",
+    "apiKeyRequiredDesc": "Se necesita una clave API de CurseForge para explorar mods"
   },
   "news": {
     "title": "TODAS LAS NOTICIAS",

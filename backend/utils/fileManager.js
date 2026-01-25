@@ -423,7 +423,8 @@ async function downloadFile(url, dest, progressCallback, maxRetries = 5) {
     const canRetry = (error.canRetry === false) ? false : isRetryable;
 
     if (!canRetry || attempt === maxRetries - 1) {
-      retryState.canRetry = false;
+      // Don't set retryState.canRetry to false for max retries - user should still be able to retry manually
+      retryState.canRetry = error.canRetry === false ? false : true;
       console.error(`Non-retryable error or max retries reached: ${error.code || error.message}`);
       break;
     }
@@ -439,6 +440,9 @@ async function downloadFile(url, dest, progressCallback, maxRetries = 5) {
   enhancedError.retryState = retryState;
   enhancedError.lastError = lastError;
   enhancedError.detailedError = detailedError;
+  
+  // Allow manual retry unless it's a connection lost error
+  enhancedError.canRetry = !lastError?.isConnectionLost && lastError?.canRetry !== false;
   throw enhancedError;
 }
 
@@ -541,6 +545,13 @@ async function retryDownload(url, dest, progressCallback, previousError = null) 
   let additionalRetries = 3; // Allow 3 additional manual retries
   if (previousError && previousError.retryState) {
     additionalRetries = Math.max(2, 5 - previousError.retryState.attempts);
+  }
+  
+  // Ensure cache directory exists before retrying
+  const destDir = path.dirname(dest);
+  if (!fs.existsSync(destDir)) {
+    console.log('Creating cache directory:', destDir);
+    fs.mkdirSync(destDir, { recursive: true });
   }
   
   try {

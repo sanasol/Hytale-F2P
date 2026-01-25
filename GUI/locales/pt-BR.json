@@ -55,7 +55,9 @@
     "noDescription": "Nenhuma descrição disponível",
     "confirmDelete": "Tem certeza de que deseja excluir \"{name}\"?",
     "confirmDeleteDesc": "Esta ação não pode ser desfeita.",
-    "confirmDeletion": "Confirmar exclusão"
+    "confirmDeletion": "Confirmar exclusão",
+    "apiKeyRequired": "Chave de API Necessária",
+    "apiKeyRequiredDesc": "Chave de API do CurseForge é necessária para procurar mods"
   },
   "news": {
     "title": "TODAS AS NOTÍCIAS",

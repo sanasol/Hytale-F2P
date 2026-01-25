@@ -25,6 +25,14 @@ jobs:
           cache: 'npm'
       - run: npm ci
 
+      - name: Create .env file
+        env:
+          CF_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+          DISCORD_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+        run: |
+          echo "CURSEFORGE_API_KEY=$CF_KEY" > .env
+          echo "DISCORD_CLIENT_ID=$DISCORD_ID" >> .env
+
       - name: Build Linux Packages
         run: |
           npx electron-builder --linux --x64 --arm64 --publish never
@@ -48,7 +56,17 @@ jobs:
           node-version: '22'
           cache: 'npm'
       - run: npm ci
-      - run: npx electron-builder --win --publish never
+      
+      - name: Create .env file
+        env:
+          CF_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+          DISCORD_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+        run: |
+          echo "CURSEFORGE_API_KEY=$CF_KEY" > .env
+          echo "DISCORD_CLIENT_ID=$DISCORD_ID" >> .env
+
+      - name: Build Windows Packages
+        run: npx electron-builder --win --publish never
       - uses: actions/upload-artifact@v4
         with:
           name: windows-builds
@@ -66,7 +84,17 @@ jobs:
           node-version: '22'
           cache: 'npm'
       - run: npm ci
-      - run: npx electron-builder --mac --publish never
+
+      - name: Create .env file
+        env:
+          CF_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+          DISCORD_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+        run: |
+          echo "CURSEFORGE_API_KEY=$CF_KEY" > .env
+          echo "DISCORD_CLIENT_ID=$DISCORD_ID" >> .env
+
+      - name: Build Windows Packages
+        run: npx electron-builder --mac --publish never
       - uses: actions/upload-artifact@v4
         with:
           name: macos-builds

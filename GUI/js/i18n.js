@@ -4,8 +4,9 @@ const i18n = (() => {
   let translations = {};
   const availableLanguages = [
     { code: 'en', name: 'English' },
-    { code: 'es', name: 'Español' },
-    { code: 'pt-BR', name: 'Português (Brasil)' }
+    { code: 'es-ES', name: 'Español (España)' },
+    { code: 'pt-BR', name: 'Portuguese (Brazil)' },
+    { code: 'tr-TR', name: 'Turkish (Turkey)' }
   ];
 
   // Load single language file

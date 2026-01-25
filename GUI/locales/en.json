@@ -57,7 +57,9 @@
     "noDescription": "No description available",
     "confirmDelete": "Are you sure you want to delete \"{name}\"?",
     "confirmDeleteDesc": "This action cannot be undone.",
-    "confirmDeletion": "Confirm Deletion"
+    "confirmDeletion": "Confirm Deletion",
+    "apiKeyRequired": "API Key Required",
+    "apiKeyRequiredDesc": "CurseForge API key is needed to browse mods"
   },
   "news": {
     "title": "ALL NEWS",

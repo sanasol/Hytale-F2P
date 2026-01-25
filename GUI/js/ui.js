@@ -10,6 +10,8 @@ let progressErrorContainer;
 let progressErrorMessage;
 let progressRetryInfo;
 let progressRetryBtn;
+let progressJRRetryBtn;
+let progressPWRRetryBtn;
 
 // Download retry state
 let currentDownloadState = {
@@ -199,7 +201,8 @@ function updateProgress(data) {
   if ((data.error || (data.message && data.message.includes('failed'))) && 
       !(data.retryState && data.retryState.isAutomaticRetry)) {
     const errorType = categorizeError(data.message);
-    showDownloadError(data.message, data.canRetry, errorType);
+    console.log('[UI] Showing download error:', { message: data.message, canRetry: data.canRetry, errorType });
+    showDownloadError(data.message, data.canRetry, errorType, data);
   } else if (data.percent === 100) {
     hideDownloadError();
   } else if (data.retryState && data.retryState.isAutomaticRetry) {
@@ -230,9 +233,17 @@ function updateRetryState(retryState) {
   }
 }
 
-function showDownloadError(errorMessage, canRetry = true, errorType = 'general') {
-  if (!progressErrorContainer || !progressErrorMessage || !progressRetryBtn) return;
+function showDownloadError(errorMessage, canRetry = true, errorType = 'general', data = null) {
+  if (!progressErrorContainer || !progressErrorMessage) return;
 
+  console.log('[UI] showDownloadError called with:', { errorMessage, canRetry, errorType, data });
+  console.log('[UI] Data properties:', {
+    hasData: !!data,
+    hasRetryData: !!(data && data.retryData),
+    dataErrorType: data && data.errorType,
+    dataIsJREError: data && data.retryData && data.retryData.isJREError
+  });
+  
   currentDownloadState.lastError = errorMessage;
   currentDownloadState.canRetry = canRetry;
   currentDownloadState.errorType = errorType;
@@ -242,13 +253,37 @@ function showDownloadError(errorMessage, canRetry = true, errorType = 'general')
     currentDownloadState.branch = data.retryData.branch;
     currentDownloadState.fileName = data.retryData.fileName;
     currentDownloadState.cacheDir = data.retryData.cacheDir;
+    // Override errorType if specified in data
+    if (data.errorType) {
+      currentDownloadState.errorType = data.errorType;
+    }
   }
+
+  // Hide all retry buttons first
+  if (progressRetryBtn) progressRetryBtn.style.display = 'none';
+  if (progressJRRetryBtn) progressJRRetryBtn.style.display = 'none';
+  if (progressPWRRetryBtn) progressPWRRetryBtn.style.display = 'none';
 
   // User-friendly error messages
   const userMessage = getErrorMessage(errorMessage, errorType);
   progressErrorMessage.textContent = userMessage;
   progressErrorContainer.style.display = 'block';
-  progressRetryBtn.style.display = canRetry ? 'block' : 'none';
+
+  // Show appropriate retry button based on error type
+  if (canRetry) {
+    if (errorType === 'jre') {
+      if (progressJRRetryBtn) {
+        console.log('[UI] Showing JRE retry button');
+        progressJRRetryBtn.style.display = 'block';
+      }
+    } else {
+      // All other errors use PWR retry button (game download, butler, etc.)
+      if (progressPWRRetryBtn) {
+        console.log('[UI] Showing PWR retry button');
+        progressPWRRetryBtn.style.display = 'block';
+      }
+    }
+  }
 
   // Add visual indicators based on error type
   progressErrorContainer.className = `progress-error-container error-${errorType}`;
@@ -260,6 +295,11 @@ function showDownloadError(errorMessage, canRetry = true, errorType = 'general')
 
 function hideDownloadError() {
   if (!progressErrorContainer) return;
+
+  // Hide all retry buttons
+  if (progressRetryBtn) progressRetryBtn.style.display = 'none';
+  if (progressJRRetryBtn) progressJRRetryBtn.style.display = 'none';
+  if (progressPWRRetryBtn) progressPWRRetryBtn.style.display = 'none';
 
   progressErrorContainer.style.display = 'none';
   currentDownloadState.canRetry = false;
@@ -589,6 +629,8 @@ function setupUI() {
   progressErrorMessage = document.getElementById('progressErrorMessage');
   progressRetryInfo = document.getElementById('progressRetryInfo');
   progressRetryBtn = document.getElementById('progressRetryBtn');
+  progressJRRetryBtn = document.getElementById('progressJRRetryBtn');
+  progressPWRRetryBtn = document.getElementById('progressPWRRetryBtn');
 
   // Setup draggable progress bar
   setupProgressDrag();
@@ -784,6 +826,8 @@ function categorizeError(message) {
     return 'space';
   } else if (msg.includes('conflict') || msg.includes('already exists')) {
     return 'conflict';
+  } else if (msg.includes('jre') || msg.includes('java runtime')) {
+    return 'jre';
   } else {
     return 'general';
   }
@@ -812,6 +856,8 @@ function getErrorMessage(technicalMessage, errorType) {
       return 'Insufficient disk space. Free up space and retry.';
     case 'conflict':
       return 'Installation directory conflict. Please retry.';
+    case 'jre':
+      return 'Java runtime download failed. Please retry.';
     default:
       return 'Download failed. Please retry.';
   }
@@ -839,70 +885,192 @@ function updateConnectionQuality(quality) {
 
 // Enhanced retry button setup
 function setupRetryButton() {
-  if (!progressRetryBtn) return;
-
-  progressRetryBtn.addEventListener('click', async () => {
-    if (!currentDownloadState.canRetry || currentDownloadState.isDownloading) {
-      return;
-    }
-
-    // Disable retry button during retry
-    progressRetryBtn.disabled = true;
-    progressRetryBtn.textContent = '🔄 Retrying...';
-    progressRetryBtn.classList.add('retrying');
-    currentDownloadState.isDownloading = true;
-
-    try {
-      // Hide error state during retry
-      hideDownloadError();
-      
-      // Reset retry info styling for manual retries
-      if (progressRetryInfo) {
-        progressRetryInfo.style.background = '';
-        progressRetryInfo.style.color = '';
+  // Setup JRE retry button
+  if (progressJRRetryBtn) {
+    progressJRRetryBtn.addEventListener('click', async () => {
+      if (!currentDownloadState.canRetry || currentDownloadState.isDownloading) {
+        return;
       }
-      
-      // Update progress text with context-aware message
-      if (progressText) {
-        const contextMessage = getRetryContextMessage();
-        progressText.textContent = contextMessage;
-      }
+      progressJRRetryBtn.disabled = true;
+      progressJRRetryBtn.textContent = 'Retrying...';
+      progressJRRetryBtn.classList.add('retrying');
+      currentDownloadState.isDownloading = true;
 
-      // Ensure retry data exists, create defaults if null
-      if (!currentDownloadState.retryData) {
-        currentDownloadState.retryData = {
-          branch: 'release',
-          fileName: '4.pwr'
-        };
-        console.log('[UI] Created default retry data:', currentDownloadState.retryData);
-      }
-
-      // Send retry request to backend
-      if (window.electronAPI && window.electronAPI.retryDownload) {
-        const result = await window.electronAPI.retryDownload(currentDownloadState.retryData);
+      try {
+        hideDownloadError();
         
-        if (!result.success) {
-          throw new Error(result.error || 'Retry failed');
+        if (progressRetryInfo) {
+          progressRetryInfo.style.background = '';
+          progressRetryInfo.style.color = '';
         }
-      } else {
-        // Fallback for development/testing
-        console.warn('electronAPI.retryDownload not available, simulating retry...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        throw new Error('Retry API not available');
-      }
+        
+        if (progressText) {
+          progressText.textContent = 'Re-downloading Java runtime...';
+        }
 
-    } catch (error) {
-      console.error('Retry failed:', error);
-      const errorType = categorizeError(error.message);
-      showDownloadError(`Retry failed: ${error.message}`, true, errorType);
-      
-      // Reset retry button
-      progressRetryBtn.disabled = false;
-      progressRetryBtn.textContent = '🔄 Retry Download';
-      progressRetryBtn.classList.remove('retrying');
-      currentDownloadState.isDownloading = false;
-    }
-  });
+        if (!currentDownloadState.retryData || currentDownloadState.errorType !== 'jre') {
+          currentDownloadState.retryData = {
+            isJREError: true,
+            jreUrl: '',
+            fileName: 'jre.tar.gz',
+            cacheDir: '',
+            osName: 'linux',
+            arch: 'amd64'
+          };
+          console.log('[UI] Created default JRE retry data:', currentDownloadState.retryData);
+        }
+
+        if (window.electronAPI && window.electronAPI.retryDownload) {
+          const result = await window.electronAPI.retryDownload(currentDownloadState.retryData);
+          if (!result.success) {
+            throw new Error(result.error || 'JRE retry failed');
+          }
+        } else {
+          console.warn('electronAPI.retryDownload not available, simulating JRE retry...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          throw new Error('JRE retry API not available');
+        }
+
+      } catch (error) {
+        console.error('JRE retry failed:', error);
+        showDownloadError(`JRE retry failed: ${error.message}`, true, 'jre');
+      } finally {
+        if (progressJRRetryBtn) {
+          progressJRRetryBtn.disabled = false;
+          progressJRRetryBtn.textContent = 'Retry Java Download';
+          progressJRRetryBtn.classList.remove('retrying');
+        }
+        currentDownloadState.isDownloading = false;
+      }
+    });
+  }
+
+  // Setup PWR retry button
+  if (progressPWRRetryBtn) {
+    progressPWRRetryBtn.addEventListener('click', async () => {
+      if (!currentDownloadState.canRetry || currentDownloadState.isDownloading) {
+        return;
+      }
+      progressPWRRetryBtn.disabled = true;
+      progressPWRRetryBtn.textContent = 'Retrying...';
+      progressPWRRetryBtn.classList.add('retrying');
+      currentDownloadState.isDownloading = true;
+
+      try {
+        hideDownloadError();
+        
+        if (progressRetryInfo) {
+          progressRetryInfo.style.background = '';
+          progressRetryInfo.style.color = '';
+        }
+        
+        if (progressText) {
+          const contextMessage = getRetryContextMessage();
+          progressText.textContent = contextMessage;
+        }
+
+        if (!currentDownloadState.retryData || currentDownloadState.errorType === 'jre') {
+          currentDownloadState.retryData = {
+            branch: 'release',
+            fileName: '4.pwr'
+          };
+          console.log('[UI] Created default PWR retry data:', currentDownloadState.retryData);
+        }
+
+        if (window.electronAPI && window.electronAPI.retryDownload) {
+          const result = await window.electronAPI.retryDownload(currentDownloadState.retryData);
+          if (!result.success) {
+            throw new Error(result.error || 'Game retry failed');
+          }
+        } else {
+          console.warn('electronAPI.retryDownload not available, simulating PWR retry...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          throw new Error('Game retry API not available');
+        }
+
+      } catch (error) {
+        console.error('PWR retry failed:', error);
+        const errorType = categorizeError(error.message);
+        showDownloadError(`Game retry failed: ${error.message}`, true, errorType, error);
+      } finally {
+        if (progressPWRRetryBtn) {
+          progressPWRRetryBtn.disabled = false;
+          progressPWRRetryBtn.textContent = error && error.isJREError ? 'Retry Java Download' : 'Retry Game Download';
+          progressPWRRetryBtn.classList.remove('retrying');
+        }
+        currentDownloadState.isDownloading = false;
+      }
+    });
+  }
+
+  // Setup generic retry button (fallback)
+  if (progressRetryBtn) {
+    progressRetryBtn.addEventListener('click', async () => {
+      if (!currentDownloadState.canRetry || currentDownloadState.isDownloading) {
+        return;
+      }
+      progressRetryBtn.disabled = true;
+      progressRetryBtn.textContent = 'Retrying...';
+      progressRetryBtn.classList.add('retrying');
+      currentDownloadState.isDownloading = true;
+
+      try {
+        hideDownloadError();
+        
+        if (progressRetryInfo) {
+          progressRetryInfo.style.background = '';
+          progressRetryInfo.style.color = '';
+        }
+        
+        if (progressText) {
+          const contextMessage = getRetryContextMessage();
+          progressText.textContent = contextMessage;
+        }
+
+        if (!currentDownloadState.retryData) {
+          if (currentDownloadState.errorType === 'jre') {
+            currentDownloadState.retryData = {
+              isJREError: true,
+              jreUrl: '',
+              fileName: 'jre.tar.gz',
+              cacheDir: '',
+              osName: 'linux',
+              arch: 'amd64'
+            };
+          } else {
+            currentDownloadState.retryData = {
+              branch: 'release',
+              fileName: '4.pwr'
+            };
+          }
+          console.log('[UI] Created default retry data:', currentDownloadState.retryData);
+        }
+
+        if (window.electronAPI && window.electronAPI.retryDownload) {
+          const result = await window.electronAPI.retryDownload(currentDownloadState.retryData);
+          if (!result.success) {
+            throw new Error(result.error || 'Retry failed');
+          }
+        } else {
+          console.warn('electronAPI.retryDownload not available, simulating retry...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          throw new Error('Retry API not available');
+        }
+
+      } catch (error) {
+        console.error('Retry failed:', error);
+        const errorType = categorizeError(error.message);
+        showDownloadError(`Retry failed: ${error.message}`, true, errorType);
+      } finally {
+        if (progressRetryBtn) {
+          progressRetryBtn.disabled = false;
+          progressRetryBtn.textContent = 'Retry Download';
+          progressRetryBtn.classList.remove('retrying');
+        }
+        currentDownloadState.isDownloading = false;
+      }
+    });
+  }
 }
 
 function getRetryContextMessage() {
@@ -925,6 +1093,8 @@ function getRetryContextMessage() {
       return 'Retrying with corrected permissions...';
     case 'conflict':
       return 'Retrying after resolving conflicts...';
+    case 'jre':
+      return 'Re-downloading Java runtime...';
     default:
       return 'Initiating retry download...';
   }

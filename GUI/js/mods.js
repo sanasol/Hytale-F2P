@@ -200,10 +200,15 @@ async function loadBrowseMods() {
       browseContainer.innerHTML = `
         <div class=\"empty-browse-mods\">
           <i class=\"fas fa-key\"></i>
-          <h4>API Key Required</h4>
-          <p>CurseForge API key is needed to browse mods</p>
+          <h4 data-i18n="mods.apiKeyRequired">API Key Required</h4>
+          <p data-i18n="mods.apiKeyRequiredDesc">CurseForge API key is needed to browse mods</p>
         </div>
       `;
+      if (window.i18n) {
+        const container = modsContainer.querySelector('.empty-browse-mods');
+        container.querySelector('h4').textContent = window.i18n.t('mods.apiKeyRequired');
+        container.querySelector('p').textContent = window.i18n.t('mods.apiKeyRequiredDesc');
+      }
       return;
     }
 
