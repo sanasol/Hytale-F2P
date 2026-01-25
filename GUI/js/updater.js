@@ -49,9 +49,6 @@ function showUpdateModal(updateInfo) {
         <p class="progress-text" id="updateProgressText">Downloading...</p>
       </div>
       <div class="update-actions">
-        <button class="btn-secondary" onclick="dismissUpdateModal()">
-          <i class="fas fa-times"></i> Later
-        </button>
         <button class="btn-primary" onclick="downloadUpdate()">
           <i class="fas fa-download"></i> Download Update
         </button>
@@ -64,12 +61,10 @@ function showUpdateModal(updateInfo) {
 
 async function downloadUpdate() {
   const downloadBtn = updateModal.querySelector('.btn-primary');
-  const laterBtn = updateModal.querySelector('.btn-secondary');
   const progressDiv = updateModal.querySelector('.update-progress');
   
-  // Disable buttons and show progress
+  // Disable button and show progress
   downloadBtn.disabled = true;
-  laterBtn.disabled = true;
   progressDiv.style.display = 'block';
 
   try {
@@ -117,9 +112,6 @@ function showInstallUpdatePrompt(info) {
         <p class="update-note">The launcher will restart to complete the installation.</p>
       </div>
       <div class="update-actions">
-        <button class="btn-secondary" onclick="dismissUpdateModal()">
-          <i class="fas fa-times"></i> Install Later
-        </button>
         <button class="btn-primary" onclick="installUpdate()">
           <i class="fas fa-sync-alt"></i> Restart & Install
         </button>
