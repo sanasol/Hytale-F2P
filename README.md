@@ -217,9 +217,10 @@
    * **Ubuntu/Debian-based or Fedora/RHEL-based:** Install the DEB/RPM:
      ```bash
      # Fedora/RHEL-based
-     sudo dnf install ./hytale-f2p-launcher.rpm
+     sudo dnf install hytale-f2p-launcher.rpm
      # Debian/Ubuntu
-     sudo apt install ./hytale-f2p-launcher.deb
+     sudo apt install -y libasound2 libpng16-16 libpng-dev libicu76
+     sudo dpkg -i hytale-f2p-launcher.deb
      ```
    * **Arch Linux (pacman):** Install the package using:
      ```bash
@@ -235,7 +236,7 @@
      ```
 
 > [!NOTE]
-> Make sure to adjust the filename correctly with the version and the architecture type.
+> Make sure to adjust the filename correctly with the version and the architecture type. TIP: Use `cd` command to the package location.
 
 4. **Troubleshooting:**
    * **FUSE:** If the AppImage fails to launch on newer distributions, ensure `libfuse2` (or `fuse2` on Arch/Fedora) is installed.
