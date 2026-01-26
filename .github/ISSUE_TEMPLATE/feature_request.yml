@@ -39,7 +39,7 @@ body:
     validations:
       required: true
 
-  - type: screenshots
+  - type: textarea
     id: screenshots
     attributes:
       label: Screenshots (Optional)
