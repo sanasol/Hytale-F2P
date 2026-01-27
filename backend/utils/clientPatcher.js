@@ -147,8 +147,8 @@ class ClientPatcher {
   }
 
   /**
-   * Replace bytes in buffer - only overwrites the length of new bytes
-   * Prevents offset corruption by not expanding the replacement
+   * Replace bytes in buffer - overwrites entire old pattern with new bytes + null padding
+   * This prevents memory corruption by ensuring no leftover data from old pattern
    */
   replaceBytes(buffer, oldBytes, newBytes) {
     let count = 0;
@@ -162,7 +162,11 @@ class ClientPatcher {
     const positions = this.findAllOccurrences(result, oldBytes);
 
     for (const pos of positions) {
-      // Only overwrite the length of the new bytes
+      // First, zero out the ENTIRE old pattern region to prevent leftover bytes
+      // This is critical for .NET AOT binaries where leftover bytes can cause
+      // memory corruption (free(): invalid pointer) on glibc-based systems
+      result.fill(0x00, pos, pos + oldBytes.length);
+      // Then write the new bytes at the start of the region
       newBytes.copy(result, pos);
       count++;
     }
@@ -181,9 +185,17 @@ class ClientPatcher {
     const oldUtf8 = this.stringToUtf8(oldDomain);
     const newUtf8 = this.stringToUtf8(newDomain);
 
+    if (newUtf8.length > oldUtf8.length) {
+      console.warn(`  Warning: New UTF-8 pattern (${newUtf8.length}) longer than old (${oldUtf8.length}), skipping`);
+      return { buffer: result, count: 0 };
+    }
+
     const positions = this.findAllOccurrences(result, oldUtf8);
 
     for (const pos of positions) {
+      // Zero out the entire old string region first to prevent leftover bytes
+      result.fill(0x00, pos, pos + oldUtf8.length);
+      // Write the new string
       newUtf8.copy(result, pos);
       count++;
       console.log(`  Patched UTF-8 occurrence at offset 0x${pos.toString(16)}`);
@@ -202,6 +214,11 @@ class ClientPatcher {
     let count = 0;
     const result = Buffer.from(data);
 
+    // Full UTF-16LE encoded strings for size calculation
+    const oldUtf16Full = this.stringToUtf16LE(oldDomain);
+    const newUtf16Full = this.stringToUtf16LE(newDomain);
+
+    // Pattern without last char for searching
     const oldUtf16NoLast = this.stringToUtf16LE(oldDomain.slice(0, -1));
     const newUtf16NoLast = this.stringToUtf16LE(newDomain.slice(0, -1));
 
@@ -217,16 +234,27 @@ class ClientPatcher {
       const lastCharFirstByte = result[lastCharPos];
 
       if (lastCharFirstByte === oldLastCharByte) {
-        newUtf16NoLast.copy(result, pos);
+        // Zero out the ENTIRE old domain region first to prevent leftover bytes
+        // This is critical for .NET AOT binaries - leftover bytes cause memory corruption
+        const oldRegionEnd = pos + oldUtf16Full.length;
+        if (oldRegionEnd <= result.length) {
+          result.fill(0x00, pos, oldRegionEnd);
+        }
 
+        // Now write the new domain
+        newUtf16NoLast.copy(result, pos);
         result[lastCharPos] = newLastCharByte;
+        // Add null byte after last char for proper UTF-16LE termination
+        if (lastCharPos + 1 < result.length) {
+          result[lastCharPos + 1] = 0x00;
+        }
 
         if (lastCharPos + 1 < result.length) {
-          const secondByte = result[lastCharPos + 1];
-          if (secondByte === 0x00) {
+          const oldSecondByte = data[lastCharPos + 1]; // Check original for logging
+          if (oldSecondByte === 0x00) {
             console.log(`  Patched UTF-16LE occurrence at offset 0x${pos.toString(16)}`);
           } else {
-            console.log(`  Patched length-prefixed occurrence at offset 0x${pos.toString(16)} (metadata: 0x${secondByte.toString(16)})`);
+            console.log(`  Patched length-prefixed occurrence at offset 0x${pos.toString(16)} (was metadata: 0x${oldSecondByte.toString(16)})`);
           }
         }
         count++;
@@ -299,6 +327,7 @@ class ClientPatcher {
 
   /**
    * Patch Discord invite URLs from .gg/hytale to .gg/MHkEjepMQ7
+   * Note: The new URL is longer, so we can only patch if there's enough space
    */
   patchDiscordUrl(data) {
     let count = 0;
@@ -318,13 +347,21 @@ class ClientPatcher {
       return { buffer: lpResult.buffer, count: lpResult.count };
     }
 
-    // Fallback to UTF-16LE
+    // Fallback to UTF-16LE - but be careful since new URL is longer
     const oldUtf16 = this.stringToUtf16LE(oldUrl);
     const newUtf16 = this.stringToUtf16LE(newUrl);
+
+    // Skip if new pattern is longer - could corrupt binary
+    if (newUtf16.length > oldUtf16.length) {
+      console.log(`  Discord URL patch skipped: new URL longer than old (${newUtf16.length} > ${oldUtf16.length})`);
+      return { buffer: result, count: 0 };
+    }
 
     const positions = this.findAllOccurrences(result, oldUtf16);
 
     for (const pos of positions) {
+      // Zero out old region first, then write new
+      result.fill(0x00, pos, pos + oldUtf16.length);
       newUtf16.copy(result, pos);
       count++;
     }
