@@ -45,6 +45,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@electron/notarize": "^2.5.0",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0"
   },
@@ -131,8 +132,13 @@
         }
       ],
       "icon": "build/icon.icns",
-      "category": "public.app-category.games"
+      "category": "public.app-category.games",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
     },
+    "afterSign": "scripts/notarize.js",
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
